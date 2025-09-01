@@ -1,0 +1,180 @@
+XXX Approccio completo
+ Dati V vertici, l’alberi ricoprente avrà esattamente V-1 archi
+ si esplorano tutte le maniere di raggruppare V-1 archi scelti dagli E archi del grafo
+ l’ordine non conta (combinazioni)
+ condizione di accettazione: verifica di copertura e di aciclicità
+ problema di ottimizzazione: si considerano tutte le soluzioni e si sceglie la migliore
+ costo: esponenziale.
+
+Valore-sentinella per indicare l’assenza di un arco (peso inesistente):
+▪    maxWT (idealmente +∞), soluzione scelta nell’algoritmo di Prim
+      cammino che dista infinito = non esiste arco
+▪    0 se non sono ammessi archi a peso 0
+▪    -1 se non sono ammessi archi a peso negativo.
+
+XXX Approccio greedy
+In generale:
+▪    ad ogni passo, si sceglie la soluzione localmente ottima
+▪    non garantisce necessariamente una soluzione globalmente ottima.
+Per gli MST:
+ si parte da algoritmo incrementale, generico e greedy dove la scelta è ottima localmente
+ si può dimostrare che la soluzione è globalmente ottima.
+
+ La soluzione A corrente è un sottoinsieme degli archi di un albero ricoprente minimo.
+ inizialmente A è l’insieme vuoto
+ ad ogni passo si aggiunge ad A un arco “sicuro”
+(Invarianza: l’arco (u,v) è sicuro se e solo se aggiunto ad un sottoinsieme di un albero ricoprente minimo produce ancora un sottoinsieme di un albero ricoprente minimo)
+ fino a quando A non diventa un albero ricoprente minimo. //tratto tutti i vertici
+N.B: Un arco si dice leggero se ha peso minimo tra gli archi che attraversano il taglio.
+
+[ XXX
+weighted quick-union
+▪    quick-union: un elemento punta a chi lo rappresenta, complessità O(1)
+▪    find: percorrimento di una “catena” dall’elemento fino al rappresentante “ultimo” del sottoinsieme. Fondendo l’insieme a cardinalità minore (info salvata) in quello a cardinalità maggiore, si genera un cammino di lunghezza logaritmica, complessità = O(logN).
+(se non weighted complessità O(N)) 
+(se quick-find -> compl: O(1) find, O(N) union->cambio rappresentante degli N elementi))
+
+UF.h
+void UFinit(int N);
+int UFfind(int p, int q);
+void UFunion(int p, int q);
+
+#include "UF.h"
+static int *id, *sz;
+void UFinit(int N) {
+ int i;
+ id = malloc(N*sizeof(int));
+ sz = malloc(N*sizeof(int));
+ for(i=0; i<N; i++) {
+  id[i] = i; sz[i] = 1;
+ }
+}
+
+static int find(int x) {
+ int i = x;
+ while (i!= id[i]) i = id[i];
+ return i;
+} 
+//fino a che non trova qualcuno rappresentato da sè stesso -> vuole trovare l'antenato iniziale del nodo
+
+int UFfind(int p, int q) { return(find(p) == find(q)); }
+//deve dire se due vettori sono nello stesso insieme
+
+void UFunion(int p, int q) {
+ int i = find(p), j = find(q);
+ if (i == j) return; //se fanno già parte dello stesso insieme non fare nulla
+ if (sz[i] < sz[j]) { //fonde insieme piccolo in insieme grande (che lo rappresenterà)
+  id[i] = j; sz[j] += sz[i];
+ }
+ else {
+  id[j] = i; sz[i] += sz[j];
+ }
+}
+]
+
+XXX Algoritmo di Kruskal (1956)
+ basato su algoritmo generico
+ uso del corollario per determinare l’arco sicuro:
+ si considera una foresta di alberi, inizialmente formati dai
+singoli vertici
+ si ordinano degli archi per pesi crescenti
+ si itera la selezione di un arco sicuro: arco di peso minimo
+che connette 2 alberi generando ancora un albero
+ terminazione: considerati tutti i vertici.
+La rappresentazione degli alberi è fatta con ADT Union-Find.
+COMPLESSITA': Con l’ADT UF:
+T(n) = O(|E| lg |E|) = O(|E| lg |V|)
+in quanto, ricordando che |E| = O(|V|2) (grafo completo),
+log|E| = O(log|V|2) = O(2log|V|) = O(log|V|).
+
+void GRAPHmstK(Graph G) {
+ int i, k, weight = 0;
+ Edge *mst = malloc((G->V-1) * sizeof(Edge));
+ Edge *a = malloc(G->E * sizeof(Edge));
+ k = mstE(G, mst, a);
+ printf("\nEdges in the MST: \n");
+ for (i=0; i < k; i++) {
+  printf("(%s - %s) \n", STsearchByIndex(G->tab, mst[i].v),
+                         STsearchByIndex(G->tab, mst[i].w));
+  weight += mst[i].wt;
+ }
+ printf("minimum weight: %d\n", weight);
+}
+int mstE(Graph G, Edge *mst, Edge *a) {
+ int i, k;
+ GRAPHedges(G,a); //riempie vettore degli archi a
+ sort(a, 0, G->E-1); //ordina vettore degli archi a per peso crescente
+ UFinit(G->V);
+ for (i=0, k=0; i<G->E && k<G->V-1; i++) { //devo avere max V-1 archi in mst[k];
+  if (!UFfind(a[i].v, a[i].w) {
+  //se i due vertici non sono nello stesso sottoinsieme, li unisco 
+   UFunion(a[i].v, a[i].w);
+   mst[k++] = a[i];
+  }
+ return k;
+}
+
+
+XXX Algoritmo di Prim (1930-1959)
+COMPLESSITA': 
+- Per grafi densi: T(n) = O(|V|²)
+- Possibili  miglioramenti  per  grafi  sparsi:  usare  una  coda  a  priorità  per gestire la fringe. Con coda a priorità implementata con heap T(n) = O(|E|log|V|) .
+ soluzione brute-force
+ uso del teorema per determinare l’arco sicuro:
+    inizialmente S = 0, poi S = {vertice di partenza}
+    iterazione: V-1 passi in cui si aggiunge 1 arco alla soluzione
+       iterazione sugli archi per selezionarne 1:
+	 selezionare quello di peso minimo tra gli archi che
+	attraversano il taglio e aggiungerlo alla soluzione
+	 ciò che interessa è la distanza minima da ogni vertice ancora in
+	V-S ai vertici già in S
+	 in base al vertice in cui arriva l’arco, aggiornare S
+        //verificare se l’aggiunta di v a S diminuisce distanza, e nel caso la si aggiorna.
+    terminazione: considerati tutti i vertici, quindi soluzione che contiene V-1 archi
+    versione semplice, ma non efficiente a causa del ciclo annidato sugli archi.
+
+ Grafo come matrice delle adiacenze dove assenza di arco si indica con maxWT anziché 0
+ vettore st di G->V elementi per registrare per ogni vertice che appartiene ad S il padre
+ vettore fringe (frangia) fr di G->V elementi per registrare per ogni vertice di V-S quale è il vertice di S più vicino. È dichiarato static in Graph.c
+ vettore wt di G->V+1 elementi per registrare:
+	 per vertici di S il peso dell’arco al padre
+	 per vertici di V-S il peso dell’arco verso il vertice di S più vicino
+	 si considera un elemento fittizio con arco di peso maxWT
+	 il vettore è inizializzato con maxWT
+ variabile min per il vertice in V-S più vicino a vertici di S.
+  registra indice vertice minimo assoluto da inserire nella soluzione
+
+void GRAPHmstP(Graph G) {
+ int v, *st, *wt, weight = 0;
+ st = malloc(G->V*sizeof(int));
+ wt = malloc((G->V+1)*sizeof(int));
+ mstV(G, st, wt); //
+ printf("\nEdges in the MST: \n");
+ for (v=0; v < G->V; v++) {
+  if (st[v] != v) {
+   printf("(%s-%s)\n",STsearchByIndex(G->tab,st[v]), STsearchByIndex(G->tab,v));
+   weight += wt[v];
+  }
+ }
+ printf("\nminimum weight: %d\n", weight);
+}
+//lavora più sui vertici (frangia) che sugli archi come algoritmo precedente
+void mstV(Graph G, int *st, int *wt) {
+ int v, w, min, *fr = malloc(G->V*sizeof(int));
+ for (v=0; v<G->V; v++) {
+  st[v] = -1; fr[v] = v; wt[v] = maxWT;
+ }
+ st[0] = 0; wt[0] = 0; wt[G->V] = maxWT;
+//ciclo sui vertici prendendo sempre quello a minima distanza (min) e aggiungendolo a D
+ for (min=0; min != G->V; ) { //min non è incrementato nel ciclo, ma cambia in base a corpo
+  v=min; st[min] = fr[min];
+  for (w = 0, min = G->V; w < G->V; w++)
+   if (st[w] == -1) { //ciclo interno sui vertici w non ancora in S
+    if (G->madj[v][w] < wt[w]) { //se arco v-w migliora peso di w stimato
+     wt[w] = G->madj[v][w]; fr[w] = v; //fr=il vertice in S più vicino a w è v
+    }
+    if (wt[w] < wt[min]) min = w; 
+    //più vicino in assoluto a vertici non ancora in soluzione
+   }
+ }
+}

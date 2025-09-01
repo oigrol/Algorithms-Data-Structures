@@ -1,0 +1,383 @@
+Terminologia: la strategia di gestione dei dati è detta priority first.
+ATT: se abbiamo priorità identica -> si tende a usare un criterio FIFO (vince chi è da più tempo nella coda) o uno casuale
+ADT pq con:
+▪ con vettore/lista
+o ordinato/non ordinato
+o quasi ADT/ADT di I classe
+▪ con heap.
+
+XXX I soluzione: la coda a priorità contiene dati (lo heap che realizza la
+coda a priorità contiene i dati), l’ADT è una struct con:
+1. la coda a priorità: vettore (heap) pq->A di dati di tipo Item
+(quasi ADT, tipologia 3)
+2. heapsize: intero.
+item {
+chiave1 = priorità
+chiave2 = nome
+}
+
+XXX inserzione
+Complessità: T(n) = O(lg n).
+inserisce in foglia e fa risalire finchè il padre è minore della sua priorità
+void PQinsert(PQ pq, Item val) {
+ int i;
+ i = pq->heapsize++;
+ //FIXUP
+ while ((i>=1) && KEYcmp(KEYget(pq->A[PARENT(i)]), KEYget(val)) == -1) { //se padre contiene valore più piccolo scendo il padre
+  pq->A[i] = pq->A[parent(i)];
+  i = (i-1)/2; //potrò inserire il valore quando troverò un padre più grande
+ }
+ pq->A[i] = val;
+ return;
+}
+
+XXX PQinsert con tabella di hash
+Procede come nel caso di PQ di item:
+ si inserisce l’elemento in pq->hash, ricavando il suo indice
+e la sua priorità
+ si inseriscono indice e priorità in pq->heap, risalendo dal
+nodo corrente (inizialmente la foglia appena creata) fino
+al più alla radice in base al confronto tra priorità
+ si mantiene aggiornato il vettore pq->qp.
+Complessità: T(n) = O(lg n).
+void PQinsert (PQ pq, Item item){
+int i, index, prio;
+index =STinsert(pq->hash, item);
+prio = STgetPrio(pq->hash, index);
+i = pq->heapsize++;
+while((i>=1) && (pq->heap[PARENT(i)].prio)<prio){
+pq->heap[i] = pq->heap[PARENT(i)];
+pq->qp[pq->heap[i].index] = i;
+i = PARENT(i);
+}
+pq->heap[i].index = index;
+pq->heap[i].prio = prio;
+pq->qp[index] = i;
+}
+static void Swap(PQ pq, int pos1, int pos2){
+heapItem temp;
+int index1, index2;
+temp = pq->heap[pos1];
+pq->heap[pos1] = pq->heap[pos2];
+pq->heap[pos2] = temp;
+// update correspondence index-pos
+index1 = pq->heap[pos1].index;
+index2 = pq->heap[pos2].index;
+pq->qp[index1] = pos1;
+pq->qp[index2] = pos2;
+}
+static void Heapify(PQ pq, int i) {
+int l, r, largest;
+l = LEFT(i);
+r = RIGHT(i);
+if (l<pq->heapsize && (pq->heap[l].prio>pq->heap[i].prio))
+largest = l;
+else
+largest = i;
+if (r<pq->heapsize && (pq->heap[r].prio>pq->heap[largest].prio))
+largest = r;
+if (largest != i) {
+Swap(pq, i, largest);
+Heapify(pq, largest);
+}
+}
+
+lettura del massimo
+pq->A[0];
+
+XXX estrazione del massimo -> PQextract
+PQextractMax
+ Modifica lo heap, estraendone il valore massimo, che
+è contenuto nella radice:
+ scambia la radice con l'ultima delle foglie (quella più a
+destra nell'ultimo livello)
+ riduce di 1 della dimensione dello heap
+ ripristina le proprietà dello heap mediante
+applicazione di HEAPify.
+Complessità: T(n) = O(lg n).
+
+Item PQextractMax(PQ pq) {
+ Item val; 
+ swap(pq, pq->heapsize-1, 0);
+ val = pq->A[pq->heapsize-1]; //ho messo in ultima foglia il massimo e lo posso estrarre
+ pq->heapsize--; //diminuendo dimensione heap, la toglie
+ HEApify(pq, 0); //FIXDOWN
+ return val; 
+}
+
+PQextractMax con tabella di hash
+ tramite indice e tabella di hash si recupera l’item e lo si
+cancella dalla tabella di hash
+ si aggiorna pq->qp alla fine
+Item PQextractMax(PQ pq) {
+int index;
+Item item;
+item = STgetItem(pq->hash, pq->heap[0].index);
+STdelete(pq->hash, item);
+Swap (pq, 0, pq->heapsize-1);
+index = pq->heap[pq->heapsize-1].index;
+pq->qp[index]=-1;
+pq->heapsize--;
+pq->heap[pq->heapsize].index=-1; // redundant
+Heapify(pq, 0);
+return item;
+}
+
+XXX cambio priorità
+PQchange
+ Modifica la priorità di un elemento, la cui posizione
+(indice nello heap) viene calcolata con una scansione di
+costo lineare
+ o risale dalla posizione data fino al più alla radice
+confrontando la chiave del padre con la chiave modificata,
+facendo scendere la chiave del padre nel figlio se la chiave
+modificata è maggiore, altrimenti la inserisce nel nodo
+corrente (fixup)
+ o applica HEAPify a partire dalla posizione data. (fixdown)
+Complessità: T(n) = O(n) + O(lg n) = O(n). -> ricerca indice elemento + heapify
+
+void PQchange (PQ pq, Item val) {
+ int i, found = 0, pos;
+ for (i = 0; i < pq->heapsize && found == 0; i++)
+  if (NAMEcmp(NAMEget(&(pq->A[i])), NAMEget(&val))==0) {
+   found = 1;
+   pos = i;
+  }
+ if (found==1) {
+  while(pos>=1 && PRIOget(pq->A[PARENT(pos)])<PRIOget(val)){
+   pq->A[pos] = pq->A[PARENT(pos)];
+   pos = (pos-1)/2;
+  }
+  pq->A[pos] = val;
+  Heapify(pq, pos);
+ }
+ else
+  printf("key not found!\n");
+ return;
+}
+
+XXX per RIDURRE complessità PQchange
+non ricerco elemento ma sfrutto conversione chiave indice delle tabelle di hash
+
+SOLUZIONE 2 
+1. la PQ non contiene gli item (dati) ma puntatori agli item
+ in coda si inseriscono solo «riferimenti» ad item (es. puntatori)
+ l’item ha un campo pos (posizione in PQ)
+ il modulo Item fornisce le operazioni ITEMsetPos e
+ITEMgetPos che permettono di ottenere la posizione di un
+item con costo O(1)
+
+2. la PQ non contiene gli item (dati) ma indici che permettono di
+reperire il dato. Se la chiave dell’item è univoca, la si usa come
+riferimento tramite una tabella di simboli efficiente.
+ la chiave dell’item deve essere univoca, senza possibili duplicati
+ il modulo PQ usa la chiave dell’item per gestire una
+corrispondenza chiave-indice mediante una tabella di simboli
+efficiente (es. Hash table O(1), BST bilanciato O(lg(n))
+ lo heap che realizza la coda a priorità contiene dati di un tipo
+heapItem interno alla PQ formato da coppie (indice, priorità)[!= item -> nome/priorita]. Si
+adotta la versione di «chiave affiancata al dato» (la priorità è un
+parametro aggiuntivo) invece che «chiave parte del dato»
+ la PQ contiene Il vettore pq->qp (posizione in coda) serve per
+implementare una PQchange efficiente, identificando la posizione
+dell’elemento nello heap con costo O(1) (l’elemento è un indice)
+senza bisogno di una scansione lineare.
+
+struttura dati:
+1. la tabella di hash pq->hash con dati di tipo Item gestisce la
+corrispondenza indice/dato e dato/indice con costo in media O(1)
+2. la coda a priorità come heap implementato come vettore pq->A di
+dati di tipo heapItem (Tipo di dato interno al modulo PQ per gestire la coppia (indice,priorità))
+3. heapsize: intero per la dimensione corrente dello heap
+4. il vettore pq->qp per memorizzare a quale indice nello heap si
+trova un dato di tipo heapItem (per identificare la posizione dell’elemento nello heap).
+
+ Tramite la tabella di hash pq->hash si ottiene l’indice
+dell’item e se ne cambia la priorità
+ il vettore pq->qp, dato l’indice dell’item, ritorna con costo
+unitario la posizione dell’elemento nello heap
+ si risale dalla posizione data fino al più alla radice
+confrontando la priorità del padre con la priorità
+modificata, facendo scendere l’heapItem del padre nel
+figlio se la priorità modificata è maggiore, altrimenti la si
+inserisce nel nodo corrente
+ si applica HEAPify a partire dalla posizione data.
+
+void PQchange (PQ pq, Item item) {
+int index, prio, pos;
+heapItem temp;
+index = STsearch(pq->hash, item);
+if (index == -1) { printf("Item not found!\n"); return; }
+else
+printf("found at index %d\n", index);
+prio = PRIOget(item);
+STchangePrio(pq->hash, index, prio);
+pos = pq->qp[index];
+temp = pq->heap[pos];
+temp.prio = prio; // new prio
+while ((pos>=1) && (pq->heap[PARENT(pos)].index < prio)) {
+pq->heap[pos] = pq->heap[PARENT(pos)];
+pq->qp[pq->heap[pos].index] = pos;
+pos = PARENT(pos);
+}
+pq->heap[pos] = temp;
+pq->qp[index] = pos;
+Heapify(pq, pos);
+}
+ADT 1 CLASSE
+Implementazione della struttura dati:
+ vettore/lista non ordinato
+ vettore/lista ordinato //PQinsert, PQextractMax, PQshowMax, PQdisplay, PQsize, PQchange
+ heap di dati/indici.
+
+PQ.h
+typedef struct pqueue *PQ;
+PQ PQinit(int maxN);
+void PQfree(PQ pq);
+int PQempty(PQ pq);
+void PQinsert(PQ pq, Item val);
+Item PQextractMax(PQ pq);
+Item PQshowMax(PQ pq);
+void PQdisplay(PQ pq);
+int PQsize(PQ pq);
+void PQchange(PQ pq, Item val);
+
+PQ.c
+#include "Item.h"
+#include "PQ.h"
+struct pqueue { Item *A; int heapsize; };
+static int LEFT(int i) { return (i*2 + 1); }
+static int RIGHT(int i) { return (i*2 + 2); }
+static int PARENT(int i) { return ((i-1)/2); }
+PQ PQinit(int maxN){
+PQ pq = malloc(sizeof(*pq));
+pq->A = (Item *)malloc(maxN*sizeof(Item));
+pq->heapsize = 0;
+return pq;
+}
+
+void PQfree(PQ pq){
+free(pq->A);
+free(pq);
+}
+int PQempty(PQ pq) { return pq->heapsize == 0; }
+int PQsize(PQ pq) { return pq->heapsize; }
+Item PQshowMax(PQ pq) { return pq->A[0]; }
+void PQdisplay(PQ pq) {
+int i;
+for (i = 0; i < pq->heapsize; i++)
+ITEMstore(pq->A[i]);
+}
+
+con TABELLA DI HASH (PQchange complessità minore)
+typedef struct {int index; int prio;} heapItem;
+struct pqueue {heapItem *heap; ST hash; int *qp; int heapsize; };
+PQ PQinit(int maxN) {
+int i;
+PQ pq = malloc(sizeof(*pq));
+pq->heap = malloc(maxN*sizeof(heapItem));
+pq->hash = STinit(maxN);
+pq->qp = malloc(STsize(pq->hash)*sizeof(int));
+for (i=0; i < maxN; i++)
+pq->heap[i].index = -1;
+for (i=0; i < STsize(pq->hash); i++)
+pq->qp[i] = -1;
+pq->heapsize = 0;
+return pq;
+}
+
+void PQfree(PQ pq) {
+free(pq->qp);
+STfree(pq->hash);
+free(pq->heap);
+free(pq);
+}
+int PQempty(PQ pq){
+return pq->heapsize == 0;
+}
+int PQsize(PQ pq) {
+return pq->heapsize;
+}
+
+//con liste ordinate
+pq.h
+typedef struct pqueue *PQ;
+PQ PQinit(int maxN);
+int PQempty(PQ pq);
+void PQinsert(PQ pq, Item data); 
+Item PQextractMax(PQ pq);
+Item PQshowMax(PQ pq);
+void PQdisplay(PQ pq);
+void PQchange(PQ pq, Item data);
+
+pq.c
+typedef struct PQnode *link;
+struct PQnode{ 
+Item val; 
+link next; 
+}; 
+struct pqueue { link head; };
+link NEW(Item val, link next) { 
+link x = malloc(sizeof *x); 
+x->val = val; 
+x->next = next; 
+return x;
+}
+PQ PQinit(int maxN) {
+PQ pq = malloc(sizeof *pq) ;
+pq->head = NULL;
+return pq;
+}
+int PQempty(PQ pq) { 
+return pq->head == NULL;
+}
+Item PQshowMax(PQ pq) {
+return pq->head->val;
+}
+void PQdisplay(PQ pq) {
+link x;
+for (x=pq->head; x!=NULL; x=x->next) 
+ITEMdisplay(x->val);
+return;
+}
+void PQinsert (PQ pq, Item val) {
+link x, p;
+Key k = KEYget(val); 
+if (pq->head==NULL || KEYless(KEYget(pq->head->val),k)) { 
+pq->head = NEW(val, pq->head); 
+return;
+}
+for(x=pq->head->next, p=pq->head; x!=NULL&&KEYless(k,KEYget(x->val)); p=x, x=x->next);
+p->next = NEW(val, x);
+return;
+Item PQextractMax(PQ pq) {
+Item tmp; 
+link t;
+if (PQempty(pq)) { 
+printf("PQ empty\n"); 
+return ITEMsetvoid();
+}
+tmp = pq->head->val; 
+t = pq->head->next; 
+free(pq->head);
+pq->head = t;
+return tmp;
+}
+void PQchange (PQ pq, Item val) {
+link x, p;
+if (PQempty(pq)) {
+printf("PQ empty\n"); return;
+}
+for(x=pq->head, p=NULL; x!=NULL; p=x, x=x->next) {
+if (ITEMeq(x->val, val)){ 
+if (x==pq->head)
+pq->head = x->next; 
+else
+p->next = x->next;
+free(x);
+break;
+}
+}
+PQinsert(pq, val); 
+return;
+}

@@ -1,0 +1,106 @@
+XXX heapify
+void HEAPify(Heap h, int i) { //T(n) = O(h) = O(lg n) = cammino radice-foglia caso peggiore
+ int l, r, largest;
+ l = LEFT(i);
+ r = RIGHT(i);
+ if ((l<h->heapsize) && KEYcmp(KEYget(h->A[l]),KEYget(h->A[i]))==1)
+  largest = l;
+ else
+  largest = i;
+ if ((r<h->heapsize) && KEYcmp(KEYget(h->A[r]), KEYget(h->A[largest]))==1)
+  largest = r;
+ if (largest != i) {
+  Swap(h, i, largest);
+  HEAPify(h, largest);
+ }
+}
+
+XXX heapbuild
+void HEAPbuild (Heap h) { 
+//applica HEAPify dal padre dell’ultima foglia o coppia di foglie fino alla radice.
+ int i;
+ for (i=(h->heapsize)/2-1; i >= 0; i--)
+  HEAPify(h, i);
+}
+COMPLESSITA: 
+T(n) = 2T(n/2) + log2(n) -> 2 sottoalberi + heapify -> 
+ERRATO: intuitiva ed imprecisa: n passi ciascuno di costo logn, quindi T(n) = O(n lg n)
+CORRETTO: precisa: T(n) = O(n)
+
+Funzione HEAPsort
+ Trasforma il vettore in uno heap mediante HEAPbuild (a h->A[0] ho sicuramente il massimo)
+ Scambia il primo e ultimo elemento (scambio radice con l'ultima delle foglie)
+ Riduce la dimensione dello heap di 1
+ Ripristina la proprietà di heap  //applica heapify da radice appena scambiata
+ Ripete fino a esaurimento dello heap.
+Caratteristiche:
+ complessità: T(n)= O(n lg n).
+ in loco
+ non stabile
+
+struct heap { Item *A; int heapsize; };
+int LEFT(int i) { return (i*2 + 1); }
+int RIGHT(int i) { return (i*2 + 2); }
+int PARENT(int i) { return ((i-1)/2); }
+
+h->A 5 3 2 6 4 1 9 7;
+     p l r lllrrlrrlll
+
+XXX heapsort
+void HEAPsort(Heap h) {
+ int i, j;
+ HEAPbuild(h);
+ j = h->heapsize;
+ for (i=h->heapsize-1; i>0; i--) {
+  swap(A, 0, i);
+  h->heapsize--;
+  HEAPify(h,0);
+ } 
+ h->heapsize = j;
+}
+
+
+void swap(Item *A, int i, int j) {
+ int temp = A[i];
+ A[i] = A[j];
+ A[j] = temp;
+}
+
+ADT 1 classe
+Heap.h
+typedef struct heap *Heap;
+Heap HEAPinit(int maxN);
+Void HEAPfree(Heap h);
+void HEAPfill(Heap h, Item val);
+void HEAPsort(Heap h);
+void HEAPdisplay(Heap h);
+
+Heap.c
+#include "Item.h"
+#include "Heap.h"
+struct heap { Item *A; int heapsize; };
+int LEFT(int i) { return (i*2 + 1); }
+int RIGHT(int i) { return (i*2 + 2); }
+int PARENT(int i) { return ((i-1)/2); }
+Heap HEAPinit(int maxN) {
+Heap h;
+h = malloc(sizeof(*h));
+h->A = malloc(maxN*sizeof(Item));
+h->heapsize = 0;
+return h;
+}
+void HEAPfree(Heap h) {
+free(h->A);
+free(h);
+}
+void HEAPfill(Heap h, Item item) { //usata per inserire valori, non necessariamente il risultato sarà uno heap
+int i;
+i = h->heapsize++;
+h->A[i] = item;
+return;
+}
+void HEAPdisplay(Heap h) {
+int i;
+for (i = 0; i < h->heapsize; i++)
+ITEMstore(h->A[i]);
+}

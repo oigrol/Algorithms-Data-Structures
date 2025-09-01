@@ -1,0 +1,71 @@
+list.h
+typedef
+struct list *LIST;
+void listInsHead (LIST l, Item val);
+Item listSearch (LIST l, Key k);
+void listDelKey (LIST l, Key k);
+
+list.c
+typedef struct node_s *link;
+
+typedef struct node_s {
+ item val;
+ link next;
+} node;
+
+link head=NULL;
+
+XXX nuovo nodo
+link newNode(Item val, link next) {
+ link x = malloc(sizeof(*x));
+ x->val = val;
+ x->next = next;
+ return x;
+}
+
+XXX inserzione in testa
+link h = newNode(val, head);
+
+XXX inserimento in mezzo
+t->next = x->next;
+x->next = t;
+
+XXX inserzione in coda
+for (x=h; x->next!=NULL; x=x->next);
+x->next = newNode (val, NULL);
+
+XXX cancellazione in mezzo di nodo t / bypass
+x->next = t->next; // x->next = x->next->next
+
+XXX cancellazione da testa
+(se estrazione: temp = h->val)
+h = h->next
+(return temp)
+
+XXX attraversamento 
+for (link p=head, x=p->next; x!= NULL; p=x, x=x->next)
+
+XXX ricerca chiave k
+for (link x=head; x!= NULL; x=x->next) { 
+ if (KEYcmp(k, x->val)) 
+  return x->val;
+[se estrazione
+ if (x == head) head = x->next;
+ else p->next = x->next;
+]
+}
+
+
+XXX inserzione in lista ordinata
+link SortListIns(link h, item val) {
+ link x, p;
+ key k = KEYget(val);
+ if (h==NULL || KEYmaggiore(KEYget(h->val), k)) {
+  //inserimento in testa
+  return newNode(val, h);
+ for (p=h, x=h->next; x!=NULL && KEYmaggiore(k, KEYget(x->val); p=x, x=x->next);
+ //arrivato in posizione inserisco
+ p->next = newNode(val, x);
+ return h;
+}
+

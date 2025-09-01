@@ -1,0 +1,183 @@
+Cammini minimi:
+ da sorgente singola: cammino minimo e suo peso da s a ogni altro vertice v
+	 algoritmo di Dijkstra (greedy)
+	 algoritmo di Bellman-Ford (progr. dinamica)
+ con destinazione singola
+ tra una coppia di vertici
+ tra tutte le coppie di vertici.
+
+1-Vettore dei padri per cammini minimi
+2- Sottografo cammini minimi dei predecessori
+3- Albero dei cammini minimi:
+G’ = (V’, E’) dove V’ ⊆ V && E’ ⊆ E
+▪    V’: insieme dei vertici raggiungibili da s
+▪    s radice dell’albero
+▪    ∀v∈V’ l’unico cammino semplice da s a v in G’ è un cammino minimo da s a v in G.
+Nei grafi non pesati: si ottiene con una visita in ampiezza.
+
+XXX algoritmo di Dijkstra
+//stima (limite superiore) del peso del cammino minimo da s a v (iniz. inf)
+for (int v=0; v<G->V; v++) {
+ d[v]= maxWT, st[v] = -1;
+ d[s] = 0; st[s] = 0;
+}
+//Relaxation // (s,v) <= (s,u) + w(u,v)
+//d[v] e st[v] verificando se conviene il cammino da s a u e l’ arco e = (u,v)
+if (d[v] > d[u] + w(u,v)) {
+ //mi conviene fare il percorso attraverso il nodo intermedio u che è a distanza minore
+ d[v] = d[u] + w(u, v);
+ st[v] = u;
+}
+//Se non esiste un cammino tra s e v, allora si ha sempre infinito
+
+COMPLESSITA':
+V-S: coda a priorità pq (Θ(|V|)) dei vertici ancora da stimare. Termina per pq vuota. Implementando la pq con uno heap:
+▪      estrae u da V-S (d[u] minimo) -> O(lg|V|)
+▪      inserisce u in S
+▪      rilassa (O(lg|V|)) tutti gli archi uscenti da u (O(|E|))
+
+T(n) =  O((|V|+|E|) lg |V|)
+T(n) =  O(|E| lg |V|) se tutti i vertici sono raggiungibili da s
+(quando tutti i vertici sono raggiungibili dal vertice sorgente s, tutti gli archi del grafo verranno esplorati, rendendo più significativo il numero di archi ∣E∣ rispetto al numero di vertici ∣V∣)
+
+ Ipotesi: non esistono archi a peso < 0
+ Strategia: greedy
+ S: insieme dei vertici il cui peso sul cammino minimo
+da s è già stato determinato
+ V-S: coda a priorità PQ dei vertici ancora da stimare.
+Termina per PQ vuota:
+	 estrae u da V-S (d[u] minimo)
+	 inserisce u in S
+	 rilassa tutti gli archi uscenti da u.
+
+void GRAPHspD(Graph G, int id) { //Dijkstra
+ int v;
+ link t;
+ PQ pq = PQinit(G->V); //PQ con priorità in d
+ int *st, *d; 
+ st = malloc(G->V*sizeof(int));
+ d = malloc(G->V*sizeof(int));
+ for (v = 0; v < G->V; v++){
+  st[v] = -1;
+  d[v] = maxWT;
+  PQinsert(pq, d, v); //inserisco tutti i vertici in coda a priorità
+ }
+ d[id] = 0;
+ st[id] = id;
+ PQchange(pq, d, id); //cambio la priorità (distanza) di quel vertice sorgente d=0
+ while (!PQempty(pq)) { //finchè la coda non si svuota
+//ha senso solo se la distanza è diversa da infinito
+  if (d[v = PQextractMin(pq, d)] != maxWT) { //estraggo elemento in testa a coda a priorità
+   for (t = G->ladj[v]; t!=G->z; t=t->next) {
+    if (d[t->v] > d[v] + t->wt) { //distanza di vertice da sorgente > dist. nodo intermedio
+     d[t->v] = d[v] + t->wt;
+     PQchange(pq, d, t->v);
+     st[t->v] = v;
+    }
+   }
+  }
+ }
+ printf("\n Shortest path tree\n");
+ for (v = 0; v < G->V; v++)
+  printf("parent of %s is %s \n", STsearchByIndex(G->tab, v), STsearchByIndex (G->tab, st[v]));
+ printf("\n Min.dist. from %s\n", STsearchByIndex(G->tab, id));
+ for (v = 0; v < G->V; v++)
+  printf("%s: %d\n", STsearchByIndex(G->tab, v), d[v]);
+ Pqfree(pq);
+}
+
+
+XXX Cammini minimi su DAG pesati (NON ESISTONO CICLI)
+L’assenza di cicli semplifica l’algoritmo:
+ ordinamento topologico del DAG
+ per tutti i vertici ordinati:
+ applica la relaxation da quel vertice.
+▪    Applicabile a DAG anche con archi negativi
+▪    T(n) =  O(|V|+|E|).
+
+
+XXX Cammini massimi su DAG pesati
+//Notare le stime iniziali a -∞ tranne che del vertice di partenza (0)
+Problema non trattabile su grafi pesati qualsiasi.
+L’assenza di cicli tipica dei DAG rende facile il problema:
+ ordinamento topologico del DAG
+ per tutti i vertici ordinati:
+ applica la relaxation «invertita» da quel vertice:
+ if (d[v]< d[u] + w(u,v)) {
+  d[v] = d[u] + w(u,v);
+  st[v] = u;
+ }
+
+
+XXX Algoritmo di Bellman-Ford
+ Ipotesi: possono esistere archi a peso < 0
+ Rileva cicli < 0
+ Strategia: programmazione dinamica
+//Archi in ordine lessicografico
+Programmazione dinamica -> da ricorsivo a iterativo bottom-up
+lavoriamo su liste di incidenza, non di adiacenza -> trattiamo i vertici entranti in v (non uscenti)
+▪    |V|-1 passi esattamente (o massimo se ho punto fisso) -> se + o - non cammino semplice
+▪    al passo i-esimo:
+	▪    ciclo di rilassamento sugli archi «in avanti» (lista di adiacenza e non di incidenza)
+▪    al |V|-esimo passo:
+▪    diminuisce almeno una stima: ∃ ciclo <0
+▪    altrimenti soluzione ottima.
+COMPLESSITA'
+▪    Inizializzazione O(|V|)
+▪    |V|-1 passi in ciascuno dei quali si  rilassano tutti gli  |E| archi O(|V||E|)
+▪    |V|esimo passo di controllo in cui si rilassano tutti gli archi O(|E|)
+T(n) = O(|V| |E|).
+DIVERSA da complessità visita in profondità con lista adiacenze (non scandiamo archi V volte) 
+
+
+void GRAPHspBF(Graph G, int id){
+ int v, i, negcycfound;
+ link t;
+ int *st, *d;
+ st = malloc(G->V*sizeof(int));
+ d = malloc(G->V*sizeof(int));
+ for (v = 0; v < G->V; v++) {
+  st[v]= -1;
+  d[v] = maxWT;
+ }
+ d[id] = 0;
+ st[id] = id;
+ for (i=0; i<G->V-1; i++)
+  for (v=0; v<G->V; v++)
+   if (d[v] < maxWT)
+    for (t=G->ladj[v]; t!=G->z ; t=t->next)
+     if (d[t->v] > d[v] + t->wt) {
+      d[t->v] = d[v] + t->wt;
+      st[t->v] = v;
+     } 
+ negcycfound = 0;
+ for (v=0; v<G->V; v++)
+  if (d[v] < maxWT)
+   for (t=G->ladj[v]; t!=G->z ; t=t->next)
+    if (d[t->v] > d[v] + t->wt)
+     negcycfound = 1;
+ if (negcycfound == 0) {
+  printf("\n Shortest path tree\n");
+  for (v = 0; v < G->V; v++)
+   printf("Parent of %s is %s \n", STsearchByIndex(G->tab, v), STsearchByIndex (G->tab, st[v]));
+   printf("\n Min.dist. from %s\n", STsearchByIndex (G->tab, s));
+   for (v = 0; v < G->V; v++)
+     printf("%s: %d\n", STsearchByIndex (G->tab, v), d[v]);
+  }
+  else
+   printf("\n Negative cycle found!\n");
+}
+
+ARBITRAGE
+1000 VAL2 = 777 VAL1 = 655,11 VAL3 = 1006,10 VAL2
+Guadagno di 6,10 VAL2 ⇒ arbitrage Sul ciclo
+VAL2 – VAL1 – VAL3 – VAL2
+il prodotto dei tassi di cambio è
+0.777 * 0.843 * 1.536 = 1,0061  > 1.0
+⇓
+c’è arbitrage quando ∃ ciclo a peso > 1
+
+▪    peso degli archi = -ln(tasso di cambio)
+▪    il ciclo con prodotto dei cambi > 1 diventa un ciclo in cui la somma dei logaritmi 
+ha peso negativo
+▪    algoritmo di Bellman-Ford per rilevare il ciclo a peso negativo

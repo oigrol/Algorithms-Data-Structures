@@ -1,0 +1,13 @@
+DISCRETO
+Ogni oggetto o è preso (xj=1) o lasciato (xj=0).
+Appetibilità: valore specifico vj / wj decrescente.
+Approccio greedy: a ogni passo aggiungo l’oggetto a massimo valore
+specifico compatibile con il peso disponibile.
+
+CONTINUO
+ 0 <= xj <= 1
+Ogni oggetto può essere preso per una frazione xj.
+Appetibilità: valore specifico vj / wj decrescente.
+Approccio greedy: ad ogni passo aggiungo la frazione di oggetto a
+massimo valore specifico compatibile con il peso disponibile.
+i primi oggetti li prendo con la massima frazione, mentre gli altri oggetti li prendo in una frazione tale che riempia la restante capacità

@@ -1,0 +1,318 @@
+tabella di simboli: vettore contenente stringhe vertici il cui indice è l'indice del vertic
+BST o tabella di Hash
+▪    STsearch da chiave (nome) a intero (indice)
+▪    STsearchByIndex da chiave (indice) a stringa (nome) -> scansione lineare
+GRAPH.H
+typedef struct edge { int v; int w; int wt; } Edge;
+typedef struct graph *Graph; //ADT 1 classe
+Graph GRAPHinit(int V);
+void GRAPHfree(Graph G);
+void GRAPHload(FILE *fin); //Lettura di un grafo da file
+void GRAPHstore(Graph G, FILE *fout); Scrittura di un grafo su file
+int GRAPHgetIndex(Graph G, char *label); //dato nome label
+void GRAPHinsertE(Graph G, int id1, int id2; int wt; ); //Dati int vertici->arco->inserirlo
+void GRAPHremoveE(Graph G, int id1, int id2);
+void GRAPHedges(Graph G, Edge *a); //elencare in un vettore a di archi tutti gli archi
+int GRAPHpath(Graph G, int id1, int id2); //dati due vertici trova cammino (grafo orientato
+void GRAPHpathH(Graph G, int id1, int id2); //non orient //Trovare cammino di hamilton
+void GRAPHbfs(Graph G, int id); //Visita al grafo in ampiezza (breath first source)
+void GRAPHdfs(Graph G, int id); //Visita al grafo in profondità (deep first source)
+int GRAPHcc(Graph G); //non orient ->Trovare componenti connesse
+int GRAPHscc(Graph G); //orient ->Trovare componenti fortemente connesse
+
+Graph GRAPHload(FILE *fin) {
+ int V, i, id1, id2, wt;
+ char label1[MAXC], label2[MAXC]; //etichette vertici
+ Graph G;
+ fscanf(fin, "%d", &V);
+ G = GRAPHinit(V);
+ for (i=0; i<V; i++) {
+  fscanf(fin, "%s", label1);
+  STinsert(G->tab, label1, i); //Leggo nomi vertici da tabella di simboli
+ }
+ while(fscanf(fin,"%s %s %d", label1, label2, &wt) == 3) {
+  id1 = STsearch(G->tab, label1); //Leggo archi (2 vert) prendendo indice da tab di simboli
+  id2 = STsearch(G->tab, label2);
+  if (id1 >= 0 && id2 >=0)
+   GRAPHinsertE(G, id1, id2, wt);
+ }
+ return G;
+}
+//formato standard:
+ numero V di vertici sulla prima riga
+ V righe con ciascuna il nome di un vertice
+ numero indefinito di righe con coppie vertice-vertice
+per gli archi (con peso se grafo pesato).
+
+void GRAPHstore(Graph G, FILE *fout) {
+ int i;
+ Edge *a;
+ a = malloc(G->E * sizeof(Edge));
+ GRAPHedges(G, a); //Memorizza tutti gli archi nel vettore
+ fprintf(fout, "%d\n", G->V);
+ for (i = 0; i < G->V; i++)
+  fprintf(fout, "%s\n", STsearchByIndex(G->tab, i));
+ for (i = 0; i < G->E; i++)
+  fprintf(fout, "%s %s %d\n",
+          STsearchByIndex(G->tab, a[i].v), STsearchByIndex(G->tab, a[i].w), a[i].wt);
+}
+
+void GRAPHinsertE(Graph G, int id1, int id2, int wt) {
+ insertE(G, EDGEcreate(id1, id2, wt)); //Crea arco dati i vertici e li inserisce nel grafo
+}
+void GRAPHremoveE(Graph G, int id1, int id2) {
+ removeE(G, EDGEcreate(id1, id2, 0));
+}
+
+Graph.c
+MATRICE
+struct graph {int V; int E; int **madj; ST tab;};
+static int **MATRIXint(int r, int c, int val) {
+ int i, j;
+ int **t = malloc(r * sizeof(int *));
+ for (i=0; i < r; i++) 
+  t[i] = malloc(c * sizeof(int));
+ for (i=0; i < r; i++)
+  for (j=0; j < c; j++)
+   t[i][j] = val;
+ return t;
+}
+
+static Edge EDGEcreate(int v, int w, int wt) {
+ Edge e;
+ e.v = v; e.w = w; e.wt = wt;
+ return e;
+}
+
+Graph GRAPHinit(int V) {
+ Graph G = malloc(sizeof *G);
+ G->V = V;
+ G->E = 0; //All’inizio non ho archi
+ G->madj = MATRIXint(V, V, 0); //Inizializzo matrice vxv con tutti 0
+ G->tab = STinit(V);
+ return G;
+}
+
+void GRAPHfree(Graph G) {
+ int i;
+ for (i=0; i<G->V; i++)
+  free(G->madj[i]);
+ free(G->madj);
+ STfree(G->tab);
+ free(G);
+}
+
+static void insertE(Graph G, Edge e) {
+ int v = e.v, w = e.w, wt =e.wt;
+ if (G->madj[v][w] == 0)
+  G->E++;
+ G->madj[v][w] = 1; G->madj[v][w] = wt;
+ G->madj[w][v] = 1; G->madj[w][v] = wt; //grafi non orientati
+}
+
+//Attenzione:
+ si possono generare cappi!
+ non si possono generare multigrafi!
+
+int GRAPHgetIndex(Graph G, char *label) {
+ int id;
+ id = STsearch(G->tab, label);
+ if (id == -1) {
+  id = STcount(G->tab);
+  STinsert(G->tab, label, id); //Se ancora non c’è nella tabella di simboli, prendo indice 
+                  = numero di archi fino a ora e lo inserisco in quella posizione nella ST
+ }
+ return id; //ritorno l’indice dell’arco 
+}
+
+static void removeE(Graph G, Edge e) {
+ int v = e.v, w = e.w;
+ if (G->madj[v][w] != 0) //Se c’è l’arco ne decremento il numero
+  G->E--;
+ G->madj[v][w] = 0;
+ G->madj[w][v] = 0; //non orientati
+}
+
+void GRAPHedges(Graph G, Edge *a) { //crea vettore a che racchiude archi
+ int v, w, E = 0;
+ for (v=0; v < G->V; v++) //Cerca tutti i vertici adiacenti al vertice corrente
+  for (w=v+1; w < G->V; w++) //non orientati (ho già considerato da a->b non considero b->a
+  for (w=0; w < G->V; w++) //grafi orientati
+   if (G->madj[v][w] !=0)
+    a[E++] = EDGEcreate(v, w, G->madj[v][w]); //Se arco esiste lo salvo nel vettore
+ return;
+}
+-------------------------------------------------------------------------------------------
+
+Graph.c
+LISTA
+typedef struct node *link;
+struct node { int v; int wt; link next; } ;
+struct graph{int V; int E; link *ladj; ST tab; link z;} ;
+
+static link NEW(int v, int wt, link next) {
+ link x = malloc(sizeof *x);
+ x->v = v; 
+ x->wt = wt; 
+ x->next = next;
+ return x;
+}
+
+static Edge EDGEcreate(int v, int w, int wt) {
+ Edge e;
+ e.v = v; e.w = w; e.wt = wt;
+ return e;
+}
+
+Graph GRAPHinit(int V) {
+ int v;
+ Graph G = malloc(sizeof *G);
+ G->V = V;
+ G->E = 0;
+ G->z = NEW(-1, -1, NULL); //Nodo sentinella -> non contiene nulla
+ G->ladj = malloc(G->V*sizeof(link)); //Lista adiacenze = vettore di puntatori
+ for (v = 0; v < G->V; v++)
+  G->ladj[v] = G->z; //Riempio lista delle adiacenze con puntatori a nodo sentinella
+ G->tab = STinit(V);
+ return G;
+}
+
+void GRAPHfree(Graph G) {
+ int v;
+ link t, next;
+ for (v=0; v < G->V; v++)
+  for (t=G->ladj[v]; t != G->z; t = next) {
+   next = t->next; //Cancello un nodo della lista per volta ricordandomi il prossimo
+   free(t);
+  }
+ STfree(G->tab);
+ free(G->ladj); free(G->z); free(G);
+}
+
+void GRAPHedges(Graph G, Edge *a) { //Recupera tutti gli archi di un determinato grafo
+ int v, E = 0;
+ link t;
+ for (v=0; v < G->V; v++) 
+ //Per ogni lista puntata che si trova nella cella di questo vettore
+  for (t=G->ladj[v]; t != G->z; t = t->next)
+   if (v < t->v) //non orientato = voglio solo uno tra AB e BA
+    a[E++] = EDGEcreate(v, t->v, t->wt);
+}
+
+//Attenzione: si possono generare cappi!
+static void insertE(Graph G, Edge e) {
+ int v = e.v, w = e.w, wt = e.wt;
+ G->ladj[v] = NEW(w, wt, G->ladj[v]);
+ G->ladj[w] = NEW(v, wt, G->ladj[w]); //non orientato = Oltre vw inserisco anche wv
+ G->E++;
+}
+
+static void removeE(Graph G, Edge e) {
+ int v = e.v, w = e.w; link x, p;
+ for (x = G->ladj[v], p = NULL; x != G->z; p = x, x = x->next) {
+  if (x->v == w) {
+   if (x == G->ladj[v]) G->ladj[v] = x->next;
+   else p->next = x->next;
+   break;
+  }
+ }
+/*SOLO SE grafi non orientati -> Comprende anche wv oltre vw
+ for (x = G->ladj[w], p = NULL; x != G->z; p = x, x = x->next) {
+  if (x->v == v) {
+   if (x == G->ladj[w]) G->ladj[w] = x->next;
+   else p->next = x->next;
+   break;
+  }
+ }
+*/
+ G->E--; free(x);
+}
+
+XXX GENERARE GRAFI casuali
+int randV(Graph G) {
+//Ci dà in modo random un numero compreso tra 0 e V-1
+ return G->V * (rand() / (RAND_MAX + 1.0)); 
+}
+
+//metodo 1: Genera due vertici casuali, crea arco e lo inserisce nel grafo
+//Può generare sia chiappi sia archi ripetuti (multigrafi)
+Graph GRAPHrand1(Graph G, int V, int E) {
+ while (G->E < E)
+  GRAPHinsertE(G, randV(G), randV(G));
+ return G;
+}
+
+//metodo 2: Tra tutti gli archi prende solo quelli che superano probabilità p
+//no archi ripetuti -> E archi in media
+//E = p * [1/2 * V * (V-1)] 
+Graph GRAPHrand2(Graph G, int V, int E) {
+ int i, j; double p = 2.0 * E / (V * (V-1));
+ for (i = 0; i < V; i++)
+  for (j = i+1; j < V; j++)
+   if (rand() < p * RAND_MAX) se minore della probabilità
+    GRAPHinsertE(G, i, j);
+ return G;
+}
+
+XXX CAMMINO SEMPLICE / DI HAMILTON
+- Cammino semplice: Visita i vertici senza ripetizioni, ma non necessariamente tutti.
+- Cammino hamiltoniano: Visita tutti i vertici una volta sola.
+void GRAPHpath/GRAPHpathH(Graph G, int id1, int id2) {
+ int t, found, *visited;
+ visited = malloc(G->V*sizeof(int));
+ for (t=0; t<G->V; t++)
+  visited[t]=0;
+ if (id1 < 0 || id2 < 0)
+  return;
+ found = pathR/pathRH(G, id1, id2, G->V-1, visited); //G->V-1 è la len in Hamilton che vogl
+ if (found == 0)
+  printf("\n Path not found!\n");
+}
+
+XXX SEMPLICE
+static int pathR(Graph G, int v, int w, int *visited) {
+ int t;
+ if (v == w)
+  return 1;
+ visited[v] = 1;
+ for (t = 0 ; t < G->V ; t++) //con matrice delle adiacenze
+  if (G->madj[v][t] == 1) //se c'è arco corrispondente
+   if (visited[t] == 0) //se non ancora visitato
+    if (pathR(G, t, w, visited)) { //ricorro ricorsivamente da vertice t (adiac. a v) a w
+     printf("(%s, %s) in path\n", STsearchByIndex(G->tab, v), STsearchByIndex(G->tab, t));
+     return 1;
+    }
+ return 0;
+}
+
+XXX DI HAMILTON (d = intero che indica quanto manca a un cammino lungo |V|-1)
+static int pathRH(Graph G, int v, int w, int d, int *visited) {
+ int t;
+ if (v == w) {
+  if (d == 0) return 1; //solo se abbiamo completato un cammino in esattamente V-1 passi
+  else return 0;
+ }
+ visited[v] = 1;
+ for (t = 0 ; t < G->V ; t++)
+  if (G->madj[v][t] == 1)
+   if (visited[t] == 0)
+    if (pathRH(G, t, w, d-1, visited)) { //cammino accorciato di 1
+     printf("(%s, %s) in path \n", STsearchByIndex(G->tab, v), STsearchByIndex(G->tab, t));
+     return 1;
+    }
+  visited[v] = 0; //backtrack -> trasforma complessità algoritmo in esponenziale
+ return 0;
+}
+
+XXX Il Cammino di EULERO (ponti di konigsberg -> né cammini, né cicli di Eulero)
+▪    CICLO DI EULERO -> Un grafo non orientato ha un ciclo di Eulero solo se è connesso e tutti i suoi vertici sono di grado pari
+▪    CAMMINO DI EULERO -> Un  grafo  non  orientato  ha  un  cammino  di  Eulero  se  e  solo  se  è connesso e se esattamente due vertici hanno grado dispari.
+
+verifica se esiste Ciclo di Eulero:
+calcolo grado per ogni coppia di vertici collegata da arco -> se di grado pari ok
+se ho trattato tutti i vertici ok
+Algoritmo di complessità O(|E|)
+
+
+XXX Multigrafo: archi multipli che connettono la stessa coppia di vertici
+

@@ -1,0 +1,42 @@
+1. Input: insieme di n attività caratterizzate da tempo di inizio e
+tempo di fine [s, f)
+ Output: insieme con il massimo numero di attività compatibili
+ Compatibilità: [si, fi) e [sj, fj) non si sovrappongono, cioè si >= fj
+oppure sj >= fi
+ Approccio greedy: ordinamento delle attività in base a una
+funzione di appetibilità. -> tempo di fine crescente
+
+void select(Item *act, int n) {
+int i, stop;
+KEYsetSel(&act[0]);
+stop = KEYgetStop(act[0]);
+for (i=1; i<n; i++)
+if (KEYgetStart(act[i]) >= stop) {
+KEYsetSel(&act[i]);
+stop = KEYgetStop(act[i]);
+}
+}
+
+int main() {
+int n, i;
+Item *act;
+printf("No. of activities: "); scanf("%d", &n);
+act = calloc(n,sizeof(Item));
+printf("Input activities: \n");
+for (i=0; i<n; i++) act[i] = ITEMscan();
+MergeSort(act, n);
+select(act, n);
+printf("Selected activities: \n");
+for (i=0; i<n; i++)
+if (KEYgetSel(act[i])==1)
+ITEMstore(act[i]);
+return 0;
+}
+
+2.  Input: insieme di n attività caratterizzate da tempo di
+inizio e tempo di fine [s, f) e durata f-s
+ Output: insieme con somma delle durate massima
+ L’approccio greedy con ordinamento delle attività per
+tempo di fine crescente non dà sempre una soluzione
+ottima
+

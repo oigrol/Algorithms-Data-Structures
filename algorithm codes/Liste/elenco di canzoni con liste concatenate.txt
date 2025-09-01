@@ -1,0 +1,29 @@
+typedef struct node_s *link;
+
+typedef struct node_s {
+ item val;
+ link next;
+} node_t;
+
+typedef struct canz_s {
+ char titolo ;
+ int id_cant
+} canz_t;
+
+typedef struct cant_s {
+ char *nome;
+ link h; //header inizio lista canzoni cantante
+} cant_t; 
+
+void genEl(cant_t *cant, int n_cant, canz_t *canz , int n_canz) {
+ int i, id_c;
+ item val;
+ //inizializzo a NULL puntatori a teste delle liste
+ for (i=0; i<n_cant; i++)
+  cant[i].h = NULL;
+ for (i=0; i<n_canz; i++) { //per ogni canzone la inserisco in lista al cantante corretto
+  id_c = canz[i].id_cant;
+  val = strdup(canz[i].titolo);
+  cant[id_c].h = newNode(val, cant[id_c].h);
+ }
+}

@@ -1,0 +1,8 @@
+Struttura dati: coda a priorità (frequenze crescenti, proprietà greedy)
+ Inizialmente: simbolo = foglia
+ Passo i-esimo:
+ estrazione dei 2 simboli (o aggregati) a minor frequenza
+ costruzione dell’albero binario (aggregato di simboli): nodo =
+simbolo o aggregato, frequenza = somma delle frequenze
+ inserimento nella coda a priorità
+ Terminazione: coda vuota.

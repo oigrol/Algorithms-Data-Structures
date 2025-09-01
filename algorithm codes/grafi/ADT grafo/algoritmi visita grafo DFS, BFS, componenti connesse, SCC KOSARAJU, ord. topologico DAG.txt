@@ -1,0 +1,267 @@
+ALGORITMI DI VISITA DEI GRAFI
+XXX VISITA IN PROFONDITA SEMPLIFICATA
+void GRAPHsimpleDfs(Graph G, int id) {
+ int v, cnt=0, *pre;
+ pre = malloc(G->V * sizeof(int)); //vettore pre[i] registra il tempo di scoperta
+ if ((pre == NULL)) return;
+ for (v=0;v<G->V;v++) pre[v]=-1; //inizializzo con -1 -> non scoperto ancora
+ simpleDfsR(G, EDGEcreate(id,id), &cnt, pre);
+ //finita ricorsione, ci saranno nodi ancora non visitati (a partire da id)
+ for (v=0; v < G->V; v++)
+  if (pre[v]== -1) //controllo tutti i nodi, se ci sono non visitati, riparte DFS da quello
+   simpleDfsR(G, EDGEcreate(v,v), &cnt, pre);
+ printf("discovery time labels \n");
+ for (v=0; v < G->V; v++)
+  printf("vertex %s : %d \n", STsearchByIndex(G->tab, v), pre[v]);
+}
+static void simpleDfsR(Graph G, Edge e, int *cnt, int *pre) {
+ link t;
+ pre[w] = (*cnt)++;
+ for (t=G->ladj[w]; t!=G->z; t=t->next) 
+  if (pre[t->v] == -1) 
+  //ricorro su vertici adiacenti a w, nella sua lista di adiacenza -> non ancora visti
+  //visita termina quando termino lista adiacenze a partire da quel vertice -> implicita
+   simpleDfsR(G, EDGEcreate(w, t->v), cnt, pre);
+}
+
+GRAFO ACICLICO SE NON TROVO ARCHI BACK CON DFS (non basta per identificare cicli)
+XXX VISITA IN PROFONDITA COMPLETA //se grafo non connesso -> foresta di alberi (in st[] padre)
+void GRAPHDfs(Graph G, int id) {
+ int v, time=0, *pre, *post, *st; //pre=salvo tempi di inizio scoperta (pre-ord) [time++]
+ pre/post/st = malloc(G->V * sizeof(int));//post=salvo tempi di fine elaborazione (post-ord
+ for (v=0;v<G->V;v++) {
+  pre[v]=-1; post[v]=-1; st[v]=-1;}
+ DfsR(G, EDGEcreate(id,id), &time, pre, post, st); 
+ //faccio partire discesa ricorsiva da vertice di partenza
+ for (v=0; v < G->V; v++)
+ //finita discesa vedo se ci sono altri vertici non visitati per far partire nuova visita
+  if (pre[v]==-1)
+   DfsR(G, EDGEcreate(v,v), &time, pre, post, st);
+ printf("tempo fine scoperta \n");
+ for (v=0; v < G->V; v++)
+  printf("%s:%d/%d\n",STsearchByIndex(G->tab,v),pre[v],post[v]);
+ printf("risultato visita in profondità: \n");
+ for (v=0; v < G->V; v++)
+  printf("%s’s parent: %s \n",STsearchByIndex (G->tab, v),STsearchByIndex (G->tab, st[v]));
+}
+void DfsR(Graph G, Edge e, int *time, int *pre, int *post, int *st){
+ link t;
+ int v, w=e.w;
+ edge x;
+ if (e.v != e.w) //se non è arco fittizio -> è tree
+  printf("(%s, %s): T \n", STsearchByIndex (G->tab, e.v), STsearchByIndex (G->tab, e.w));
+ st[e.w] = e.v; //entro da arco e marco che il padre del nodo w è v
+ pre[w] = (*time)++; //ho scoperto w al tempo time -> avanza counter *time
+ for (t = G->ladj[w]; t != G->z; t = t->next) //visito tutta la lista di adiacenze
+  if (pre[t->v] == -1)
+   DfsR(G, EDGEcreate(w, t->v), time, pre, post, st);
+   //se vertice non ancora scoperto nuova visita in profondità e assegno arco tree
+  else {
+   v = t->v;
+   x = EDGEcreate(w, v);
+   //se già scoperto vedo che tipo di etichetta associare a quell'arco da w a v
+
+   //grafo non orientato -> se non è un arco di tipo T è per forza di tipo B
+   //ATT: se c'è arco da u a v c'è anche da v a u, ma devo prendere arco solo una volta
+   if (pre[w] < pre[v])
+   printf("(%s, %s): B\n", STsearchByIndex(G->tab, x.v), STsearchByIndex(G->tab,x.w)) ;
+   
+   //grafi orientati
+   if (post[v] == -1) //vertice non ancora terminato -> arco Backward
+   printf("(%s, %s): B\n", STsearchByIndex(G->tab, x.v), STsearchByIndex(G->tab, x.w));
+   else
+    if (pre[v] > pre[w]) //arco Forward
+     printf("(%s,%s):F\n",STsearchByIndex(G->tab, x.v), STsearchByIndex(G->tab, x.w));
+    else //se nè T, nè B, nè F -> arco di tipo Cross
+     printf("(%s,%s):C\n",STsearchByIndex(G->tab, x.v), STsearchByIndex(G->tab, x.w));
+  }
+ post[w] = (*time)++;
+}
+//HO VISITATO TUTTI I VERTICI INDIPENDENTEMENTE SE RAGGIUGNIBILI O MENO DA V DI PARTENZA
+
+XXX Visita in ampiezza
+La BFS utilizza una coda (queue) per mantenere i nodi in attesa di essere visitati. Il processo è il seguente:
+1. Iniziamo visitando il nodo di partenza (radice).
+2. Mettiamo il nodo visitato in una coda.
+3. Estraiamo il nodo dalla coda e visitiamo tutti i suoi vicini (che non sono stati ancora scoperti), mettendo anche questi nella coda.
+4. Continuiamo fino a che la coda non è vuota, assicurandoci di non visitare due volte lo stesso nodo.
+Variabili utili in BFS:
+- pre[]: array per tenere traccia del tempo di scoperta (quando scopriamo un nodo).
+- st[]: array che tiene traccia del predecessore di ciascun nodo (nodo da cui arriviamo).
+- dist[]: array che memorizza la distanza dal nodo di partenza.
+
+void GRAPHbfs(Graph G, int id) {
+ int v, time=0, *pre, *st, *dist;
+ /* allocazione di pre, st e dist */
+ for (v=0; v < G->V; v++) {
+  pre[v] = -1; st[v] = -1; dist[v] = INT_MAX; //inizializzo variabili -> nessuno visitato
+ }
+ bfs(G, EDGEcreate(id,id), &time, pre, st, dist); //parto da arco fittizio
+ printf("\n albero BFS \n");
+ for (v=0; v < G->V; v++)
+  if (st[v] != -1)
+   printf("%s’s parent is:%s\n",STsearchByIndex(G->tab, v),STsearchByIndex(G->tab, st[v]));
+ printf("\n Visualizzo livelli -> distanza nodo da radice \n");
+ for (v=0; v < G->V; v++)
+  if (st[v] != -1)
+   printf("%s: %d \n",STsearchByIndex(G->tab,v),dist[v]);
+   //per ogni nodo indico la sua distanza dalla radice
+}
+void bfs(Graph G, Edge e, int *time, int *pre, int *st, int *dist) {
+ int x;
+ Q q = Qinit(); //coda ADT di prima classe
+ Qput(q, e); //metto arco fittizio nella coda
+ dist[e.v]=-1;
+ //specifico valore di partenza di distanza di e.v da nodo di partenza (per nodo fittizio)
+ while (!Qempty(q)) //finchè la coda non si svuota
+  if (pre[(e = Qget(q)).w] == -1) {//se nodo e.w non ancora scoperto
+  //estraggo arco da coda, prendo w e verifico se questo vertice è ancora bianco(non scope)
+  //se non scoperto imposto predecessore, dist. da radice e metto vertici adiacenti in coda
+   pre[e.w] = (*time)++; //e.w scoperto al tempo *time (incremento)
+   st[e.w] = e.v; //e.v è padre di e.w
+   dist[e.w] = dist[e.v]+1; //inizi. -1, lo scopro
+   for (x = 0; x < G->V; x++)
+    if (G->madj[e.w][x] == 1) //analizzo vertici adiacenti a nodo w
+     if (pre[x] == -1) //se vertice adiacente a e.w non ancora scoperto
+      Qput(q, EDGEcreate(e.w, x)); //creo arco e lo inserisco nella coda
+  }
+}
+
+XXX COMPONENTI CONNESSE
+ ogni albero della foresta della DFS è una componente connessa
+ cc[v] indica componente connessa di cui fa parte vertice
+faccio visita in profondità e tutti i vertici raggiungibili da uno stesso vertice iniziale fanno parte della stessa componente connessa, altrimenti no
+ senza registrare tempi di scoperta e fine elaborazione come normale ricerca in profondità
+visito lista delle adiacenze e registro a quale elemento del vettore delle componenti connesse appartiene il v-esimo vertice
+
+void dfsRcc(Graph G, int v, int id, int *cc) {
+ link t;
+ cc[v] = id; //vertici come interi da 0 a V-1 //id identifica comp. conn. a cui appart. v
+ for (t=G->ladj[v]; t != G->z; t = t->next)
+  if (cc[t->v] == -1) 
+   dfsRcc(G, t->v, id, cc);
+}
+/*fino a che abbiamo valori del vertice cc non ancora settati, continuiamo a fare la ricerca in profondità di componenti connesse
+ATT: non specifico vertice di partenza ma parto da vertice 0*/
+int GRAPHcc(Graph G) {
+ int v, id=0, *cc;
+ cc = malloc(G->V * sizeof(int));
+ for (v=0; i<G->V; i++) cc[i] = -1; //non scoperto / appartente a cc
+ for (v=0; v<G->V; v++) {
+  if (cc[v] == -1) 
+   dfsRcc(G, v, id++, cc); //ricorsivamente finchè non cambia v, stessa cc[id]
+ }
+ printf("Componenti connesse: \n");
+ for (v=0; v<G->V; v++) {
+  printf("node %s in cc %d\n", STsearchByIndex(G->tab, v), cc[v]);
+ return id; //ritorna numero di componenti connesse generate
+}
+
+XXX Connettività -> punti di articolazione e ponti(bridge)
+rimuovo vertice o arco e verifico se grafo ancora connesso (esiste ancora 1 sola cc)
+Algoritmo banale: rimuovere archi uno alla volta e verificare se il grafo rimane connesso.
+tramite visita in profondità verifico se c'è una sola componente connessa (arco non bridge)
+Se ho più componenti connesse, abbiamo sconnesso il grafo  -> quello era un arco bridge
+
+XXX DAG ordinamento topologico inverso
+//visita in profondità semplificata con lista adiacenze
+void TSdfsR(Dag D, int v, int *ts, int *pre, int *time) {
+ link t;
+ pre[v] = 0; //registra se vertice scoperto(0) o meno(-1) non salvo tempo
+ for (t=D->ladj[v]; t!=D->z; t=t->next) //scandisce vertici adiacenti a v in lista di adiac
+  if (pre[t] == -1)
+   TSdfsR(D, t->v, ts, pre, time); //count time avanza solo se v completato (non scoperto)
+ ts[(*time)++] = v; //al tempo time (indice) salvo vertice v registrato a quel tempo
+} //ho ricostruito vettore di topological sort senza usare algoritmi di ordinamento
+//con matrice adiacenze -> basta invertire i riferimenti riga-colonna (archi incidenti->non che escono da vertice ma che incidono su vertice -> scandisco arco con righ e co scambiate)
+void TSdfsR(Dag D, int v, int *ts, int *pre, int *time) {
+ int w; 
+ pre[v] = 0;
+ for (w=0; w<D->V; w++) {
+  if (D->madj[w][v] != 0) //se esiste arco
+   if (pre[w] == -1) 
+    TSdfsR(D, w, ts, pre, time);
+ }
+ ts[(*time)++] = v;
+}
+
+void DAGrts(Dag D) { //dag reverse topological sort
+ int v, time=0, *pre, *ts;
+ pre/ts = malloc(D->V*sizeof(int));
+ for (v=0; v<D->V; v++) { pre[v] = -1; ts[v] = -1; }
+ for (v=0; v<D->V; v++) 
+  if(pre[t] == -1)
+   TSdfsR(D, v, ts, pre, &time);
+ printf("DAG in ordine topologico inverso: \n");
+ for (v=0; v<D->V; v++) {
+  printf("%s ", STsearchByIndex(D->tab, ts[v]); 
+  //stampa in ordine crescente da sx a dx di tempo di fine scoperta
+ }
+ printf("\n");
+}
+
+
+XXX ALGORITMO KOSARAJU componenti fortemente connesse
+1. trasporre grafo -> grafo trasposto
+Graph revere(Graph G) {
+ //basta invertire tutti gli archi
+ int v; 
+ link t;
+ Graph R = GRAPHinit(G->V);
+ for (v=0; v<G->V; v++) {
+  for (t = G->ladj[v]; t!=G->z; t=t->next) {
+   GRAPHinsertE(R, t->v, v);
+  }
+ return R;
+}
+
+XXX 4.gli alberi dell’ultima DFS sono le componenti fortemente
+connesse.
+ in sccG[w] per ogni vertice si memorizza un intero che identifica la componente fortemente connessa cui esso appartiene e marca anche se vertice visitato dalla DFS
+ sccR[w] serve per marcare i vertici visitati dalla DFS del grafo trasposto
+ time0 è il contatore del tempo che avanza SOLO quando è terminata elaborazione vertice
+ time1 è il contatore delle SCC
+ *postR contiene per counter time0 quale vertice è stato terminato a quel tempo
+ l’istruzione post[(*time0)++]=w registra che al tempo (*time0) è stato terminato w, quindi c’è un implicito ordinamento per tempi di completamento crescenti
+ percorrendo in discesa il vettore postR si considerano i vertici in ordine di tempo di fine elaborazione decrescente senza bisogno di un algoritmo di ordinamento
+ *postG viene introdotto soltanto per avere un’unica versione della funzione ricorsiva SCCdfsR utilizzabile sia sul grafo G, sia sul grafo trasposto GT.
+
+void SCCdfsR(Graph G, int w, int *scc, int *time0, int time1, int *post) {
+ link t;
+ scc[w] = time1;
+ for (t=G->ladj[w]; t!=G->z; t=t->next) {
+  if (scc[t->v] == -1) 
+   SCCdfsR(G, t->v, scc, time0, time1, post);
+ }
+ post[(*time0)++] = w;
+ //implicito ordinamento per tempi di completamento crescenti
+}
+int GRAPHscc(Graph G) {
+ int v, time0 = 0, time1 = 0, *sccG, *sccR, *postG, *postR;
+ Graph R = GRAPHreverse(G);
+ sccG = malloc(G->V * sizeof(int));
+ sccR = malloc(G->V * sizeof(int));
+ postG = malloc(G->V * sizeof(int));
+ postR = malloc(G->V * sizeof(int));
+ for (v=0; v < G->V; v++) {
+  sccG[v]=-1; sccR[v]=-1; postG[v]=-1; postR[v]=-1;
+ }
+ //2.eseguire DFS sul grafo trasposto, calcolando i tempi di fine elaborazione
+ for (v=0; v<G->V; v++) {
+  if (sccR[v] == -1) 
+   SCCdfsR(G,v, sccR, &time0, time1, postR);
+ }
+ time0=0; time1=0;
+ //3.eseguire DFS sul grafo originale per tempi di fine elaborazione decrescenti
+ for (v=G->V-1; v>=0; v--) {
+  if (sccG[postR[v] == -1) {
+  //postR contiene vertici per tempo crescente -> visito al contrario=tempo decrescente 
+   SCCdfsR(G, postR[v], sccG, &time0, time1, postG); //postG non serve -> uniformità T
+   time1++;
+  }
+ }
+ printf("strongly connected components \n");
+ for (v = 0; v < G->V; v++)
+  printf("node %s in scc %d\n",STsearchByIndex(G->tab,v),sccG[v]);
+ return time1;
+}

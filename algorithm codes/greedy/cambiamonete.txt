@@ -1,0 +1,13 @@
+ Input: monetazione, resto da erogare
+ Output: resto con numero minimo di monete
+ Appetibilità: valore della moneta
+ Approccio greedy: a ogni passo moneta di maggior valore inferiore al
+resto residuo.
+
+for (i=0; i < numden; i++) {
+coins[i] = amount / den[i];
+amount = amount - (amount/den[i])*den[i];
+printf("n. of %d cent coins = %d\n",den[i],coins[i]);
+}
+
+ATT: non basta la funzione di appetibilità per una soluzione ottima -> bisogna applicarla al contesto
