@@ -1,0 +1,42 @@
+1. USO DI FLAG
+/* main */
+int stop = 0;
+.....
+funz_ric(..... , &stop);
+void funz_ric(....., int *stop_ptr) {
+.....
+if (condizione di terminazione) {
+.....
+(*stop_ptr) = 1;
+return;
+}
+for (i=0; condizione su i && (*stop_ptr)==0; i++) {
+.....
+funz_ric(....., stop_ptr);
+.....
+}
+return;
+}
+
+
+2. funzione ricorsiva che ritorna un valore di successo o fallimento che è testato
+(esco da ciclo o se ho provato tutte le scelte e non ho trovato soluzione (ritorno fallimento) o se ho trovato la soluzione -> uscita non strutturata)
+
+/* main */
+if (funz_ric(..... )==0)
+printf(“soluzione non trovata\n”);
+int funz_ric(.....) {
+if (condizione di terminazione)
+if (condizione di accettazione) {
+.....
+return 1;
+return 0;
+}
+for (ciclo sulle scelte) {
+scelta;
+if (funz_ric(.....))
+return 1;
+.....
+}
+return 0;
+}

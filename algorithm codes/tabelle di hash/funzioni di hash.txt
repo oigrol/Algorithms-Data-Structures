@@ -1,0 +1,101 @@
+int hash(float k, int M, float s, float t) {
+ return ((k-s)/(t-s))*M;
+}
+
+int hash(int k, int M) {
+ return k%M;
+}
+
+Funzione di hash per chiavi stringa con base prima:
+int hash(char *v, int M){  //al posto di char *v metti key v)
+ int h = 0, base = 127;
+ for (; *v != '\0'; v++)
+  h = (base * h + *v)%M;
+ return h;
+}
+
+Funzione di hash per chiavi stringa con hash universale:
+int hashU(char *v, int M) {
+ int h, a = 31415, b = 27183;
+ for (h = 0; *v != 0'; v++, a = a*b % (M-1))
+  h = (a*h + *v) % M;
+ return h;
+}
+
+
+Metodo moltiplicativo:
+chiavi: numeri in virgola mobile in un intervallo prefissato ( s ≤ k < t):
+//h(k) = (k -s) /(t - s) * M
+int hash(float k, int M, float s, float t) {
+ return ((k-s)/(t-s))*M;
+}
+//Esempio:
+M = 97, s = 0.0, t = 1.0
+k = 0.513870656
+h(k) = (0.513870656 -0) /(1 - 0) * 97 = 49 (moltiplicando per 97 riporto chiave da intervallo 0,1 in intervallo 0,97
+
+Metodo modulare:
+chiavi: numeri interi; M numero primo
+//h(k) = k % M
+int hash(int k, int M){
+ return (k%M);
+}
+//Esempio:
+M = 19
+M numero primo evita:
+•   di usare solo gli ultimi n bit di k se M = 2n
+•   di usare solo le ultime n cifre decimali di k se M = 10n.
+k = 31
+h(k) = 31 % 19 = 12
+
+Metodo moltiplicativo-modulare
+▪chiavi: numeri interi:
+▪ data costante 0<A<1
+  A = φ = (√5 – 1) / 2 = 0.6180339887
+▪ h(k) = ⎣k⋅A⎦ % M //intero inferiore
+
+Metodo modulare
+▪    chiavi: stringhe alfanumeriche corte come interi derivati dalla valutazione di polinomi in una data base
+▪    M numero primo
+▪    h(k) = k% M
+Esempio
+stringa now = ‘n’*128² + ‘o’*128 + ‘w’
+=  110*128² + 111*128 + 119 k = 1816567
+k = 1816567   M = 19
+h(k) = 1816567 % 19 = 15
+
+
+Metodo modulare:
+chiavi: stringhe alfanumeriche lunghe come interi derivati
+dalla valutazione di polinomi in una data base con il metodo di Horner (non calcolo le potenze ma faccio parentesizzazioni): ad esempio
+P7(x)    = p7x⁷+p6x⁶ + p5x⁵+p4x⁴+p3x³+p2x²+p1x+p0 = ((((((p7x+p6)x + p5)x+p4)x+p3)x+p2)x+p1)x+p0 
+Come prima:
+M numero primo
+h(k) = k % M
+Non rappresentabile su un numero ragionevole di bit -> soluzione:
+Problema: calcolo numero molto grande per poi riportarlo nell'intervallo M --> per ogni moltiplicazione ogni volta faccio %M così da ottenere sempre numeri piccoli 
+ottengo un risultato diverso da prima ma comunque è deterministico e quindi ho reso quel valore equiprobabile
+
+int hash (char *v, int M){ 
+  int h = 0, base = 128;
+  for (; *v != '\0'; v++)
+  h = (base * h + *v) % M; //%M inserito direttamente nel for
+ return h;
+}
+
+IN REALTA' PER LE STRINGHE MEGLIO:
+Funzione di hash per chiavi stringa con base prima:
+int hash (char *v, int M) { 
+ int h = 0, base = 127; 
+ for (; *v != '\0'; v++)
+ h = (base * h + *v) % M; 
+ return h;
+}
+
+Funzione di hash per chiavi stringa con hash universale:
+int hashU( char *v, int M) {
+ int h, a = 31415, b = 27183;
+ for ( h = 0; *v != '\0'; v++, a = a*b % (M-1))
+    h = (a*h + *v) % M;
+ return h;
+}

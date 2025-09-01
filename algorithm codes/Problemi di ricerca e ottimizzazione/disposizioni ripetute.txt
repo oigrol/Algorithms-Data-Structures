@@ -1,0 +1,30 @@
+disposizioni ripetute
+ES: date n=2 cifre componi tutti i possibili numeri binari formati da k=4 cifre 
+val = {0,1}
+sol = {0000, 0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001, 1010, 1011, 1100, 1101, 1110, 1111}
+num_sol = n^k = 16
+conta l'ordine
+gli elementi possono essere ripetuti fino a k volte (soluzione formata da stesso numero)
+il numero di elementi da inserire nella soluzione k è diverso dal numero di elementi che abbiamo totali n
+dimensione soluzione può essere anche più grande della dimensione dei valori, perché tanto questi possono ripetersi nella soluzione (no mark) -> k>0 (non esiste limite superiore)
+
+val = malloc(n*sizeof(int));
+sol = malloc(k*sizeof(int));
+
+
+int disp_rip(int pos, int *val, int n, int *sol, int k, int count) {
+ if (pos >= k) {
+  for (int i=0; i<k; i++)
+   printf("%d ", sol[i]);
+  printf("\n");
+  return count+1;
+ }
+
+ for (int j=0; j<n; j++) {
+  sol[pos] = val[j];
+  count = disp_rip(pos+1, val, n, sol, k, count);
+  //backtrack implicito perché tanto posso sovrascrivere la stessa pos della soluzione con altri elementi
+ }
+
+ return count;
+}

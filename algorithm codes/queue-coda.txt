@@ -1,0 +1,120 @@
+o enqueue / put: inserisci un elemento (QUEUEput)
+o dequeue get : preleva (e cancella) l’elemento che è stato inserito meno recentemente (QUEUEget)
+Terminologia: la strategia di gestione dei dati è detta FIFO (First In First Out)
+
+▪ con vettore
+o quasi ADT
+o ADT di I classe
+Spazio:
+▪vettore: spazio allocato sempre pari al massimo previsto,
+vantaggioso per code quasi piene
+
+QUEUE.h
+typedef struct queue *QUEUE;
+QUEUE QUEUEinit(int maxN); int QUEUEempty(QUEUE q); void QUEUEput(QUEUE q, Item val);
+Item QUEUEget (QUEUE q);
+
+queue.c
+struct queue {
+Item *q;
+int N, head, tail;
+};
+QUEUE QUEUEinit(int maxN) { 
+QUEUE q = malloc(sizeof *q) ;
+q->q = malloc(maxN*sizeof(Item)); 
+q->N=maxN+1;
+q->head = N; 
+q->tail = 0; 
+return q;
+}
+int QUEUEempty(QUEUE q) {
+return (q->head)%(q->N) == q->tail;
+}
+void QUEUEput(QUEUE q, Item val) {
+q->q[tail++] = val;
+q->tail = q->tail%N;
+}
+Item QUEUEget(QUEUE q) { 
+q->head = q->head%N; 
+return q->q[q->head++];
+}
+
+Implementazione con vettore (O(n))
+ put assegna alla prima cella libera, se esiste, in fondo al vettore
+con complessità O(1). L’indice tail contiene il numero di
+elementi nella coda
+ get da posizione fissa ( head = 0 ), ma comporta scalare a sinistra
+tutti gli elementi restanti con costo O(n)
+
+Implementazione con vettore (O(1)): buffer circolare
+▪ put assegna alla prima cella libera, se esiste, in posizione indicata
+da indice tail (O(1))
+▪ get da posizione variabile (head assume valori tra 0 e N-1). Le celle del vettore 
+occupate da elementi si spostano per via di put e get (buffer circolare).
+o head e tail sono incrementati MODULO N (N-2, N-1, 0, 1, …)
+o Non è più garantito head<=tail:
+•  coda vuota: head raggiunge tail
+•  coda piena: tail raggiunge head
+implemento buffer circolare con incremento modulo N: quando arrivo in fondo, l'indice riparte dall'inizio (giro intorno a N), ma lo faccio prima o dopo aver incrementato/utilizzato? è indifferente
+
+▪ con lista
+o quasi ADT
+o ADT di I classe
+Spazio:
+ lista: spazio utilizzato proporzionale al numero di elementi
+correnti, vantaggioso per code che cambiano rapidamente
+dimensione
+Tempo:
+ put e get T(n) = O(1)
+
+queue.h
+typedef struct queue *QUEUE;
+QUEUE QUEUEinit(int maxN); int QUEUEempty(QUEUE q); void QUEUEput(QUEUE q,
+Item val);
+Item QUEUEget (QUEUE q);
+
+queue.c
+typedef struct QUEUEnode *link;
+struct QUEUEnode{ Item val; link next; }; 
+struct queue { link head; link tail; };
+link NEW(Item val, link next) { 
+link x = malloc(sizeof *x) ; 
+x->val = val; 
+x->next = next; 
+return x;
+}
+QUEUE QUEUEinit(int maxN) { 
+QUEUE q = malloc(sizeof *q) ; 
+q->head = NULL;
+return q;
+}
+int QUEUEempty(QUEUE q) { 
+return q->head == NULL;
+}
+
+void QUEUEput (QUEUE q, Item val) {
+if (q->head == NULL){
+q->tail = NEW(val, q->head) ; 
+q->head = q->tail;
+return;
+}
+q->tail->next = NEW(val,q->tail->next);
+q->tail = q->tail->next;
+}
+Item QUEUEget(QUEUE q) { 
+Item tmp = q->head->tmp; 
+link t = q->head->next;
+free(q->head); 
+q->head = t; 
+return tmp;
+}
+
+Servono 2 variabili head e tail:
+▪ head permette di accedere all’elemento in testa, cioè il prossimo
+da estrarre
+▪ tail permette di accedere:
+o implementazione a vettore: alla locazione che segue l’ultimo elemento in
+coda, cioè alla posizione della prossima inserzione
+o implementazione a lista: alla posizione dell’ultimo elemento in coda.
+
+

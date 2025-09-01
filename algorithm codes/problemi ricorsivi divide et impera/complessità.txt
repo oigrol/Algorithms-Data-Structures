@@ -1,0 +1,111 @@
+Matematici:
+ fattoriale
+n! = n * (n-1)!
+0! = 1! = 1
+decrease and conquer
+a = 1 ki = 1
+T(n) = (1) + T(n-1)
+T(n) = O(n)
+
+ numeri di Fibonacci
+FIBn = FIBn-2 + FIBn-1
+FIB0 = 0
+FIB1 = 1
+(a+b) : a = a : b = b : (a-b)
+La sezione aurea  =a/b
+( +1)/  =  quindi 2-  -1 =0
+ = (1 + sqrt(5))/2 = 1.61803
+FIBn = (n - ’n)/ sqrt(5)
+decrease and conquer
+a = 2 ki = 1 ki-1 = 2
+T(n) = 1 + T(n-1) + T(n-2) 
+T(0) = 1 T(1) = 1
+--->
+T(n) = 1 + 2T(n-1) 
+T(0)=T(1) = 1
+T(n) = O(2n)
+Stima migliore: T(n) = O(n).
+
+ massimo comun divisore
+decrease and conquer
+a = 1 ki variabile
+2)  gcd(x, y) = gcd(y, x%y)
+   terminazione: se y=0 ritorna x
+x = FIB(n+1) y = FIB(n)
+T(x,y) = T(FIB(n+1), FIB(n))
+= 1 + T(FIB(n),FIB(n+1)%FIB(n)) T(x,0) = 1
+ma FIB(n+1)%FIB(n) = FIB(n-1)
+T(x,y) = T(FIB(n+1), FIB(n))
+= 1 + T(FIB(n), FIB(n-1))
+= 􀯡􀬿􀬵
+􀯜􀭀􀬴
+T(x, y) = O(n), ma, visto che
+y = FIB(n) = (n - ’n)/ 5 = (n), allora
+n è una funzione di log(y)
+Quindi:
+T(n) = O(log(y)) e T(x, y) = O(log(y))
+
+ Il massimo di un vettore.
+divide and conquer
+a = 2 b = 2
+T(n) =2T(n/2) + 1
+T(n) = O(n)
+
+ prodotto di 2 interi positivi.
+    dividi x in 2: x = 10n/2 *xs + xd
+    dividi y in 2: y = 10n/2 *ys + yd
+    calcola ricorsivamente xs*ys, xs*yd, xd*ys, xd*yd,
+    calcola x * y = 10n *xs *ys + 10n/2 *(xs*yd + xd*ys) + xd*yd
+a = 4, b = 2 divide and conquer
+T(n) =4T(n/2) + n
+T(n) = O(n2)
+
+ Algoritmo di Karatsuba e Ofman (1962): prodotto di 2 interi positivi.
+xs*yd + xd*ys = xs*ys + xd*yd – (xs - xd)* (ys - yd)
+3 moltiplicazioni ricorsive, anziché 4.
+divide and conquer
+a = 3 b = 2
+T(n) =3T(n/2) + n
+T(n) = O(n^log{2}3) subquadratica
+
+Informatici:
+ ricerca binaria o dicotomica
+divide and conquer
+a = 1 b = 2
+T(n) = T(n/2) + 1 
+T(n) = O(logn)
+
+ stampa in ordine inverso
+decrease and conquer
+a = 1 ki = 1
+T(n) = 1 + T(n-1)
+T(n) = O(n)
+
+Matematica ricreativa:
+ Le Torri di Hanoi
+decrease and conquer
+a = 2 ki = 1
+per n molto grande, ci si mette tempo infinito
+complessità esponenziale
+ Configurazione finale:
+   3 dischi sul terzo piolo stesso ordine decrescente
+ Regole:
+   accesso solo al disco in cima
+   sopra ogni disco solo dischi più piccoli
+ Risolvi: risolve 2 sottoproblemi di dimensione n-1 ciascuno: 2T(n-1)
+ Combina: nessuna azione
+T(n) = 2T(n-1) + 1
+T(n) = O(2n)
+
+ Il righello.
+divide and conquer
+a = 2 b = 2
+ Dividiamo l’intervallo in due metà
+ Disegniamo ricorsivamente le tacche (più corte) nella metà
+di SX
+ Disegniamo la tacca (più lunga) al centro
+ Disegniamo ricorsivamente le tacche (più corte) nella metà
+di DX
+ Condizione di terminazione: tacche di altezza 0
+T(n) = 2T(n/2) + 1
+T(n) = O(n)

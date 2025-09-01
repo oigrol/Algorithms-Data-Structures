@@ -1,0 +1,24 @@
+"C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=C:/Program Files/JetBrains/CLion 2024.2.2/bin/ninja/win/x64/ninja.exe" -G Ninja -S "C:\Users\loreg\Politecnico Di Torino Studenti Dropbox\Giovanni Lore\ALGORITMI E STRUTTURE DATI\Teoria\pdf\04 Esempi di  problemi di ricerca e ottimizzazione\Combinazioni semplici" -B "C:\Users\loreg\Politecnico Di Torino Studenti Dropbox\Giovanni Lore\ALGORITMI E STRUTTURE DATI\Teoria\pdf\04 Esempi di  problemi di ricerca e ottimizzazione\Combinazioni semplici\cmake-build-debug"
+-- The C compiler identification is GNU 13.1.0
+-- Detecting C compiler ABI info
+CMake Warning in C:/Users/loreg/Politecnico Di Torino Studenti Dropbox/Giovanni Lore/ALGORITMI E STRUTTURE DATI/Teoria/pdf/04 Esempi di  problemi di ricerca e ottimizzazione/Combinazioni semplici/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-zveim0/CMakeLists.txt:
+  The object file directory
+
+    C:/Users/loreg/Politecnico Di Torino Studenti Dropbox/Giovanni Lore/ALGORITMI E STRUTTURE DATI/Teoria/pdf/04 Esempi di  problemi di ricerca e ottimizzazione/Combinazioni semplici/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-zveim0/CMakeFiles/cmTC_0637e.dir/./
+
+  has 267 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    CMakeCCompilerABI.c.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files/JetBrains/CLion 2024.2.2/bin/mingw/bin/gcc.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Configuring done (0.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: C:/Users/loreg/Politecnico Di Torino Studenti Dropbox/Giovanni Lore/ALGORITMI E STRUTTURE DATI/Teoria/pdf/04 Esempi di  problemi di ricerca e ottimizzazione/Combinazioni semplici/cmake-build-debug

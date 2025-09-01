@@ -1,0 +1,243 @@
+struct symboltable { Item *a; int N; int M;}; //a=vettore di item
+
+delete con open addressing complesso, al massimo sovrascrivo
+Delete = operazione complessa che interrompe le catene di collisione.
+L’open addressing è in pratica utilizzato solo quando non si deve mai cancellare.
+Soluzioni:
+1.  sostituire la chiave cancellata con una chiave sentinella che conta come piena in ricerca e vuota in inserzione (puoi inserire sia se trovi vuoto 0 sia se trovi pieno cancellato -1, non se trovi 1)
+2.  reinserire le chiavi del cluster sottostante la chiave cancellata
+N.B.: Non si deve avere mai una catena con un buco in mezzo
+FUNZIONI PER LE VARIE DELETE CON OPEN ADDRESSING
+1 metodo) uso vettore status di interi che indica cella occupata in ricerca e vuota in inserzione -> 0 se la cella è vuota, 1 se è occupata, 1 se cancellata
+Cancellare item, ricordando che c’era stata collisione tra quell'item e un altro.
+2 metodo) reinserire le chiavi del cluster sottostante la chiave cancellata
+Invece di far slittare tutti di una posizione e per evitare di lasciare spazi vuoti in mezzo a cluster, partendo da i+1 e andando avanti togline uno e reinseriscilo con la insert, così da rimettere elementi che hanno risentito del cluster in pos corretta come se non ci fosse mai stato cluster con item cancellato.
+ES: Cancellare E, ricordando che c’era stata collisione tra E e R -> perchè la R inizialmente doveva essere alla 4 ma era scalata alla 6 perchè la 4 era occupata da E
+
+struct symboltable { Item *a; int *status; int N; int M;};
+XXX static int CheckFull(ST st, int i); //check se la cella i è piena (status=1).
+XXX static int CheckDeleted(ST st, int i); //check se la cella è cancellata (status=-1).
+
+static int CheckFull(ST st, int i) {
+if (st->status[i] == 1) return 1;
+return 0;
+}
+
+static int CheckDeleted(ST st, int i){ 
+if (st->status[i] == -1) return 1;
+return 0;
+}
+
+|XXX| LINEAR PROBING
+int full(ST st , int i )
+ if (ITEMcheckNull(st->a[i]))
+  return 0;
+ return 1;
+}
+
+XXX inserimento:
+void STinsert (ST st , Item item) {
+ int i = hash(KEYget(&item), st->M);
+ while (full(st, i)) //while (!ITEMcheckNull(st->a[i]))
+  i = (i+1)%st->M;
+ st->a[i] = item;
+ //st->status[i] = 1; //se uso delete con vettore status cancellato
+ st->N++;
+}
+
+XXX ricerca:
+item STsearch(ST st , key k) {
+ int i = hash(KEYget(&item), st->M);
+ while (full(st, i)) //while (CheckFull(st, i)==1 || CheckDeleted(st, i)==1) se deleted
+  if (KEYcmp(k, KEYget(&st->a[i])) == 0)
+   return st->a[i];
+  else
+   i = (i+1)%st->M;
+ return ItemNULL();
+}
+
+XXX cancellazione
+1 metodo) uso vettore status di interi
+void STdelete(ST st, Key k){
+ int i = hash(k, st->M);
+ while (CheckFull(st, i)==1 || CheckDeleted(st, i)==1)
+  if (KEYcmp(k, KEYget(&st->a[i]))==0) break; 
+  else i = (i+1) % st->M;
+ if (ITEMcheckNull(st->a[i])) return; //se mi sono fermato su casella vuota -> non trovato
+ //ho trovato casella vuota -> quello che voglio cancellare non c'è
+ st->a[i] = ITEMsetNull();
+ st->N--;
+ st->status[i]=-1;
+}
+
+2 metodo) 
+void STdelete(ST st, Key k) {
+ int j, i = hash(k, st->M);
+ Item tmp;
+ while (full(st, i))
+  if (KEYcmp(k, KEYget(&st->a[i]))==0) break;
+  else
+   i = (i+1) % st->M;
+ if (ITEMcheckNull(st->a[i])) 
+  return;
+ st->a[i] = ITEMsetNull(); 
+ st->N--;
+ for (j = i+1; full(st, j); j = (j+1)%st->M, st->N) {
+  tmp = st->a[j];
+  st->a[j] = ITEMsetNull(); 
+  STinsert(st, tmp);
+  //invece di slittarli tutti di una posizione, partendo da i+1 e andando avanti togline 
+    uno e reinseriscilo con la insert
+ }
+}
+
+
+|XXX| QUADRATIC PROBING
+int full(ST st , int i )
+ if (ITEMcheckNull(st->a[i]))
+  return 0;
+ return 1;
+}
+
+XXX inserimento:
+▪ se M = 2 -> c1 = c2 = ½ (per garantire che siano generati tutti gli indici tra 0 e M-1)
+▪ se M è primo, se  α < ½  i seguenti valori (garantiscono che, con inizialmente start=h(k)  e poi index=(start+c1*i+c2*i^2) con modulo M si abbiano i valori distinti per 1≤i≤(M-1)/2) c1  = c2  = ½
+c1  = c2  = 1
+c₁ = 0, c₂ = 1.
+
+#define c1 1
+#define c2 1
+void STinsert (ST st, Item item) {
+ int i = 0, start = hash(KEYget(&item), st->M), index= start;
+ while (full(st, index)) {
+  i++;
+  index = (start + c1*i + c2*i*i)%st->M; 
+  //ATT: se c2=0 e c1=1 stessa condizione di prima linear probing-> faccio solo + 1
+ }
+ st->a[index] = item;
+ st->N++;
+}
+
+XXX ricerca:
+item STsearch(ST st , key k) {
+ int i = 0, start = hash(k, st->M), index= start;
+ item tmp;
+ while (full(st, index))
+  if (KEYcmp(k, KEYget(&st->a[index])) == 0)
+   return st->a[index];
+  else
+   i++;
+   index = (start + c1*i + c2*i*i)%st->M;
+ return ItemNULL();
+}
+
+XXX cancellazione
+Delete (soluzione 2 -> riporto posizioni pre cluster)
+void STdelete(ST st, Key k) {
+ int i=0, start = hash(k, st->M), index = start;
+ Item tmp;
+ while (full(st, index))
+ if (KEYcmp(k, KEYget(&st->a[index]))==0) break; 
+ else { 
+  i++;  
+  index = (start + c1*i + c2*i*i)%st->M;
+ }
+ if (ITEMcheckNull(st->a[index])) return;
+ st->a[index] = ITEMsetNull(); 
+ st->N--; 
+ i++;
+ //dopo che ho cancellato riporto gli altri item a posizioni pre cluster, ricalcolandone la 
+   posizione
+ index = (start + c1*i + c2*i*i)%st->M; 
+ while(full(st, index)) {
+  tmp = st->a[index];
+  st->a[index] = ITEMsetNull();
+  st->N--; i++;
+  STinsert(st, tmp);
+  index = (start + c1*i + c2*i*i)%st->M;
+ }
+}
+
+
+|XXX| DOUBLE HASHING
+static int hash1(Key k, int M) {
+ int h = 0, base = 127;
+ for ( ; *k != 0'; k++)
+  h = (base * h + *k) % M;
+ return h;
+}
+
+static int hash2(Key k, int M) {
+ int h = 0, base = 127;
+ for ( ; *k != 0'; k++) h = (base * h + *k);
+ h = ((h % 97) + 1)%M;
+ if (h==0) h=1;
+ return h;
+}
+
+int full(ST st , int i )
+ if (ITEMcheckNull(st->a[i]))
+  return 0;
+ return 1;
+}
+
+XXX inserimento:
+void STinsert (ST st, Item item) {
+ int i = hash1( KEYget (&item), st->M)
+ int j = hash2( KEYget (&item), st->M);
+ while (full(st, i)) {
+  i = (i+j)%st->M;
+ }
+ st->a[i] = item;
+ st->N++;
+}
+ 
+XXX ricerca:
+item STsearch(ST st , key k) {
+ int i = hash1(k, st->M);
+ int j = hash2(k, st->M);
+ while (full(st, i))
+  if (KEYcmp(k, KEYget(&st->a[i])) == 0)
+   return st->a[i];
+  else
+   i= (i+j)%st->M;
+ return ItemNULL();
+}
+
+XXX cancellazione:
+Delete (soluzione 2):
+void STdelete(ST st, Key k) {
+ int i = hash1(k, st->M), j = hash2(k); 
+ Item tmp;
+ //trova item e lo elimina
+ while (full(st, i))
+  if (KEYcmp(k, KEYget(&st->a[i]))==0) break; 
+  else i = (i+j) % st->M;
+ if (ITEMcheckNull(st->a[i]))
+  return;
+ st->a[i] = ITEMsetNull(); 
+ st->N--;
+ i = (i+j) % st->M; 
+ //riporta gli elementi inseriti dopo nella posizione che avrebbero assunto senza cluster
+ while(full(st, i)) {
+  tmp = st->a[i];
+  st->a[i] = ITEMsetNull();
+  st->N--;
+  STinsert(st, tmp);
+  i = (i+j) % st->M;
+ }
+}
+
+//trova dimensione vettore M
+static int STsizeSet(int maxN, float alpha) {
+int primes[16]={2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53};
+ int i = 0;
+ if (maxN < primes[15]*alpha) { 
+  for (i = 0; i<16; i++)
+   if (maxN <= primes[i]*alpha)
+    return primes[i];
+ }
+ else
+  printf("Too many entries!\n"); 
+  return -1;
+ }

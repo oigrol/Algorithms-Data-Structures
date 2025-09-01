@@ -1,0 +1,34 @@
+non conta ordine 01==10, ne basta quindi solo uno tra i due
+quindi uso start per cui riparto per inserire elementi senza andare a riempire di nuovo le stesse celle di sol -> forzo uno dei possibili ordinamenti senza provare ulteriori permutazioni -> teniamo in conto le permutazio una sola volta
+tuttavia ricorro non su i+1, ma posso ricorrere sullo stesso elemento che si può ripetere start
+non serve mark perché non vado a riempire di nuovo le stesse posizioni, ma genero soluzioni senza backtrack
+
+ES: lanciando 2 dadi, quali sono le possibili composizioni con cui si possono presentare le facce
+n=6 facce
+k=2 2 dadi = dim sol max
+val per ogni dado = {1,2,3,4,5,6}
+sol = 1-1, 1-2, 1-3, 1-4, 1-5, 1-6, 2-2, 2-3, 2-4, 2-5, 2-6, 3-3, 3-4, 3-5, 3-6, 4-5, 4-6, 5-6, 6-6
+num_sol = (n+k-1)! / k!(n-1)! = 21
+
+
+
+val = malloc(n*sizeof(int));
+sol = malloc(k*sizeof(int));
+comb_r(0, val, n, sol, k, 0, 0);
+
+int comb_r(int pos, int *val, int n, int *sol, int k, int start, int count) {
+ if (pos>=k) {
+  for (int i=0; i<k; i++) {
+   printf("%d ", sol[i]);
+  } 
+  return count+1;
+ }
+
+ for (int j=start; j<n; j++) {
+  sol[pos] = val[j];
+  count = comb_r(pos+1, val, n, sol, k, start, count);
+  start++; //solo quando ho terminato la ricorsione vado avanti nelle possibili scelte perché     	   devo anche poter generare XXXX di stessi elementi ripetuti k volte
+ }
+ return count;
+}
+  

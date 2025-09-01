@@ -1,0 +1,13 @@
+Data una sequenza di N interi
+X = (x0, x1, … xN-1)
+si definisce sottosequenza di X di lunghezza k (k N) una qualsiasi
+n-upla Y di k elementi di X con indici crescenti i0, i1, · · · , ik-1 non
+necessariamente contigui.
+Esempio:
+X=0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15
+Y = 0, 8, 12, 10, 14, 1, 7, 15 è una sottosequenza di
+lunghezza k=8 di X (indici 0, 1, 3, 5, 7, 8, 14, 15).
+Si ricordi:
+ sottosequenza: indici non necessariamente contigui
+ sottostringa/sottovettore: indici contigui
+A.

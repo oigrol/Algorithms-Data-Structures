@@ -1,0 +1,35 @@
+caso terminale: insieme il cui unico elemento è l’insieme vuoto
+caso ricorsivo: insieme formato dall’unione:
+ dall’insieme delle parti P(Sn-1) per n-1 elementi
+a cui decido di aggiungere o no l'n-esimo elemento si
+ per ogni i con gli insiemi che risultano dall’unione di ognuno degli insiemi pi
+che appartengono all’insieme delle parti per n-1 elementi P(Sn-1)
+con l’insieme che contiene l’elemento i-esimo si
+
+ Si usano 2 rami ricorsivi distinti, a seconda che
+l’elemento corrente sia incluso o meno nella soluzione
+ in sol si memorizza direttamente l’elemento, non un
+flag di presenza/assenza
+ l’indice start serve per escludere soluzioni simmetriche
+(quindi già calcolate)
+ il valore di ritorno cnt rappresenta il numero totale di
+insiemi.
+
+
+
+int powerset(int pos, int *val, int n, int *sol, int start, int count) {
+ if (start >= n) {
+  for (int i=0; i<pos; i++) {
+   printf("%d ", sol[i]);
+  }
+  printf("\n");
+  return count+1;
+ }
+
+ for (int j=start; j<n; j++) {
+  sol[pos] = val[j];
+  count = powerset(pos+1, val, n, sol, i+1, count); //aggiungo elemento e ricorro
+ }
+ count = powerset(pos, val, n, sol, n, count); // non aggiungo elemento e ricorro
+ return count;
+}

@@ -1,0 +1,12 @@
+unsigned long fib(int n, unsigned long *knownF) {
+unsigned long t;
+if (knownF[n] != -1)
+return knownF[n];
+if(n == 0 || n == 1) {
+knownF[n] = n;
+return n;
+}
+t = fib(n-2, knownF) + fib(n-1, knownF);
+knownF[n] = t;
+return t;
+}

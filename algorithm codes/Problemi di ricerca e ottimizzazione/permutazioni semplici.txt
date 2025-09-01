@@ -1,0 +1,32 @@
+permutazioni semplici  (caso particolare di disposizioni con n=k)
+conta l'ordine 01 != 10
+il numero n di elementi totali da inserire è uguale al numero n di elementi della soluzione che si possono inserire
+no ripetizioni -> vettore mark segna se preso 1 o no 0
+ES: dato un insieme val di n=3 interi genera tutte le possibili permutazioni (numeri distinti formati da 3 cifre distinte)
+val = {1, 2, 3}
+sol = {123, 132, 213, 231, 312, 321}
+num_sol = n! = 6
+
+val = malloc(n*sizeof(int));
+sol = malloc(n*sizeof(int));
+mark = calloc(n, sizeof(int));
+
+int perm(int pos, int *val, int n, int *sol, int *mark, int count) {
+ if (pos >= n) {
+  for (int i=0; i<n; i++) {
+   printf("%d ", sol[i]);
+  printf("\n");
+  return count+1;
+ }
+
+ for (int j=0; j<n; j++) {
+  if (mark[j] == 0) {
+   mark[j] = 1;
+   sol[pos] = val[j];
+   count = perm(pos+1, val, n, sol, mark, count);
+   //backtrack
+   mark[j] = 0; // tornando indietro nel livello di ricorsione lo smarco così da poterlo   		riutilizzare in altre posizioni, in quanto conta l'ordine
+  }
+ }
+ return count;
+}

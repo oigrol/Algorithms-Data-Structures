@@ -1,0 +1,23 @@
+ricorsivo
+int KNAPmaxValR(Item *items, int N, int cap) {
+int i, space, max, t;
+for (i = 0, max = 0; i < N; i++)
+if ((space = cap-items[i].size) >= 0)
+if ((t=KNAPmaxValR(items,N,space)+items[i].value)>max)
+max = t;
+return max;
+}
+
+memoization
+int KNAPmaxValM(Item *items,int N,int cap,int *maxKnown){
+int i, space, max, t;
+if (maxKnown[cap] != -1)
+return maxKnown[cap];
+for (i=0, max=0; i < N; i++)
+if ((space = cap-items[i].size) >= 0)
+if ((t=KNAPmaxValM(items,N,space,maxKnown)+
+items[i].value)>max)
+max = t;
+maxKnown[cap] = max;
+return max;
+}

@@ -1,0 +1,25 @@
+considero lettere ripetute come distinguibili
+ES:
+val = ORO 
+n=3
+num_sol = n! = 6
+sol = {ORO, OOR, ROO, ROO, OOR, ORO}
+
+int anagr(int pos, char *val, int n, char *sol, int *mark, int count) {
+ if (pos >= n) {
+  sol[pos] = '\0'; //impongo fine stringa
+  printf("%s\n", sol); //stampo soluzione = parola fino a \0 escluso
+  return count+1;
+ }
+ 
+ for (int j=0; j<n; j++) {
+  if (mark[j] == 0) {
+   mark[j] = 1;
+   sol[pos] = val[j];
+   count = anagr(pos+1, val, n, sol, mark, count);
+   //backstrack
+   mark[j] = 0;
+  }
+ }
+ return count;
+}

@@ -1,0 +1,29 @@
+non conta ordine 01==10, ne basta quindi solo uno tra i due
+quindi uso start per cui riparto per inserire elementi senza andare a riempire di nuovo le stesse celle di sol -> forzo uno dei possibili ordinamenti senza provare ulteriori permutazioni -> teniamo in conto le permutazio una sola volta
+non serve mark perché non vado a riempire di nuovo le stesse posizioni, ma genero soluzioni senza backtrack
+
+ES: combinazione di k tra n valori (voglio raggruppare 5 elementi a 4 a 4 avendo però sempre elementi distinti, non conta la posizione)
+insieme di n=5 interi -> genera tutte le combinazioni semplici di k=4 di questi valori.
+val = {7,2,0,4,1}
+num_sol = [n! / k!(n-k)!] = 5 combinazioni
+sol = {7,2,0,4},{7,2,0,1},{7,2,4,1},{7,0,4,1},{2,0,4,1}
+
+
+val = malloc(n*sizeof(int));
+sol = malloc(k*sizeof(int));
+comb_sempl(0, val, n, sol, k, 0, 0);
+
+int comb_semplici(int pos, int *val, int n, int *sol, int k, int start, int count) {
+ if (pos >= k) {
+  for (int i = 0; i<k; i++)
+   printf("%d ", sol[i]);
+  printf("\n");
+  return count+1;
+ }
+ 
+ for (int j=start; j<n; j++) {
+  sol[pos] = val[j];
+  count = comb_semplici(pos+1, val, n, sol, k, j+1, count);
+ }
+ return count;
+}

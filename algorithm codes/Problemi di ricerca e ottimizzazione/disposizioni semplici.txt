@@ -1,0 +1,37 @@
+disposizioni semplici
+ES: date n=4 cifre componi tutti i possibili numeri distinti formati da k=2 cifre distinte 
+val = {4,9,1,0}
+sol = {49, 41, 40, 94, 91, 90, 14, 19, 10, 04, 09, 01}
+num_sol = [n! / k!(n-k)!] = 6
+conta l'ordine
+gli elementi non devono essere ripetuti
+il numero di elementi da inserire nella soluzione k è diverso dal numero di elementi che abbiamo totali n (es: n>k) -> 0<=k<=n soluzione ha max n elementi non di più
+mark è un vettore che segna se elemento preso (1) o no (0)
+
+val = malloc(n*sizeof(int));
+sol = malloc(k*sizeof(int));
+mark = calloc(n, sizeof(int));
+
+
+disp_semplici(0, val, n, sol, k, mark, 0);
+
+int disp_semplici(int pos, int *val, int n, int *sol, int k, int *mark, int count) {
+ if (pos >= k) {
+  for (int i=0; i<k; i++)
+   printf("%d", sol[i]);
+  printf("\n");
+  return count+1;
+ }
+ 
+ for (int j = 0; j < n; j++) {
+  if (mark[j] == 0) {
+   mark[j] = 1;
+   sol[pos] = val[j];
+   count = disp_semplici(pos+1, val, n, sol, k, mark, count);
+   //backtrack
+   mark[j] = 0; //smarcando elementi potrò collocarli in altre posizioni della soluzione
+  }
+ }
+ return count;
+}
+ 

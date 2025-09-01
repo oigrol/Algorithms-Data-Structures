@@ -1,0 +1,40 @@
+disposizioni ripetute -> l'ordine conta -> considero elementi uno alla volta -> elem. diversi generano soluzioni diverse (k!=n si rip)
+
+Ogni sottoinsieme è rappresentato dal vettore della soluzione sol
+di n elementi:
+ l’insieme delle scelte possibili per ogni posizione del vettore è
+{0=non prendere elemento, 1=prendilo}, quindi k = 2. Il ciclo for è sostituito da 2 assegnazioni
+esplicite  (non ha senso fare un ciclo per due scelte
+ sol[pos]=0 se l’oggetto pos-esimo non appartiene al
+sottoinsieme
+ sol[pos]=1 se l’oggetto pos-esimo appartiene al sottoinsieme
+ nella stessa soluzione 0 e 1 possono comparire più volte (fino a n vol
+È scambiato il ruolo di n e k rispetto alla definizione di disposizioni
+ripetute (dove n era il numero di scelte e k la dimensione della
+soluzione).
+Disposizioni ripetute -> qui n=dimensione soluzione -> num elementi da prendere(o no)
+mentre k = num scelte possibili
+IMMAGINA ALBERO RICORSIVO sx 0 = no prendo, dx 1 = prendo
+ESEMPIO: n=4 elementi che andranno nella soluzione; fisso k=2 scelte={0,1}; 
+es: val = {1,2,3,4}
+sol generate: 0000: insieme vuoto - 0001: 4 (preso solo ultimo elemento) - 0010: 3 - 0011: 3,4 - 0100: 2 - 0101: 2,4 - 0110: 2,3 - 0111: 2,3,4 - 1000: 1 - 1001: 1,4 - 1010: 1,3 - 1011: 1,3,4 - 1100: 1,2 - 1101: 1,2,4 - 1110: 1,2,3 - 1111: 1,2,3,4 (tutto l'insieme S)
+
+int powerset(int pos, int *val, int *sol, int n, int count) {
+ if (pos >= n) {
+  //stampa soluzione
+  for (int i=0; i<n; i++) {
+   if (sol[i] == 1) {
+    printf("%d ", val[i]); //stampa solo i valori che fanno parte di quella soluzione
+   }
+   printf("\n");
+  }
+  return count+1;
+ }
+
+ sol[pos] = 0;//non prendo elemento
+ count = powerset(pos+1, val, sol, n, count);
+ sol[pos] = 1; //prendo elemento
+ count = powerset(pos+1, val, sol,n, count); //backtrack
+ return count;
+}
+ 

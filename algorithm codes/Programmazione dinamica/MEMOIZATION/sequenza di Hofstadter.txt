@@ -1,0 +1,18 @@
+typedef struct hm_ {int val;int calc;} hm;
+int HM(int n, hm *hmem) {
+if (n == 0) {
+hmem[n].val = 0; hmem[n].calc = 1;
+return hmem[n].val;
+}
+if (hmem[n].calc == 1) return hmem[n].val;
+hmem[n].val=n-HM(HM(HM(n-1,hmem),hmem),hmem);
+hmem[n].calc = 1;
+return hmem[n].val;
+}
+
+rec.
+int H(int n) {
+if (n == 0)
+return 0;
+return n - H(H(H(n-1)));
+}

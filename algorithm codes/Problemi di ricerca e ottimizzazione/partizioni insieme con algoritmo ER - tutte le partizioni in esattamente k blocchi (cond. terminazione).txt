@@ -1,0 +1,110 @@
+Calcolo di tutte le partizioni di n oggetti memorizzati nel
+vettore val esattamente in k blocchi:
+ come prima, passando il parametro k usato nella
+condizione di terminazione per “filtrare” le soluzioni
+accettate. (non per un numero variabile di blocchi come prima)
+
+
+{
+l'algoritmo di ER (Enumerazione Ricorsiva) per calcolare tutte le partizioni di n oggetti in k blocchi, senza simmetrie o duplicati.
+
+
+Calcolo di tutte le partizioni di n oggetti memorizzati nel
+vettore val in k blocchi con k compreso tra 1 e n:
+(1 blocco -> coincide con insieme di partenza
+n blocchi -> ogni blocco contiene 1 elemento)
+ indice pos per scorrere gli n oggetti e terminare la
+ricorsione quando pos >= n
+ indice i per scorrere gli m blocchi utilizzabili in quel
+passo (per ogni passo incremento i blocchi creati di 1)
+ vettore sol di n elementi per la soluzione
+
+2 ricorsioni:
+ si attribuisce l’oggetto corrente a uno dei blocchi
+utilizzabili nel passo corrente (indice i tra 0 e m-1)
+e si ricorre sul prossimo oggetto (pos+1)
+ si attribuisce l’oggetto corrente al blocco m (m+1-1) e si
+ricorre sul prossimo oggetto (pos+1) e su un
+numero di blocchi utilizzabili incrementato di 1
+(m+1). (ho 1 blocco in più a disposizione rispetto a prima)
+
+ES:
+n=3: 3 oggetti (val={1,2,3}).
+sol: vettore di lunghezza n che memorizza la partizione corrente.
+m: numero di blocchi attualmente disponibili (inizialmente m=1).
+TERMINA se pos≥n (cioè, tutti gli oggetti sono stati assegnati a un blocco)
+iniz. pos=0, m=1, sol=[0,0,0], n=3
+
+PASSO 1 (pos=0, m=1)
+L'algoritmo assegna l'oggetto val[0]=1 a uno dei blocchi disponibili.
+sol=[0,−,−], pos=1,m=1: ricorsione con 1 blocco.
+sol=[1,−,−], pos=1,m=2: ricorsione con un nuovo blocco.
+
+PASSO 2 (pos = 1, m = 1 o 2):
+Per ciascuna configurazione, assegniamo val[1]=2.
+1. se m=1:
+sol=[0,0,−], pos=2,m=1: 2 nel blocco 0.
+sol=[0,1,−], pos=2,m=2: 2 in un nuovo blocco.
+2. se m=2:
+sol=[1,0,−], pos=2,m=1: 2 nel blocco 0.
+sol=[1,1,−], pos=2,m=2: 2 nel blocco 1.
+sol=[1,2,−], pos=2,m=2: 2 in un nuovo blocco.
+
+PASSO 3 (pos = 2, m variabile):
+Per ciascuna configurazione, assegniamo val[2]=3.
+1. se m=1:
+sol=[0,0,0], pos=2,m=1: tutti gli oggetti nel blocco 0.
+2. se m=2:
+sol=[0,0,1], 3 nel blocco 1.
+sol=[0,1,0], 3 nel blocco 0, 2 nel blocco 1.
+sol=[0,1,1]: 2,3 nel blocco 1.
+sol=[1,0,0]: configurazioni simmetriche.
+3. se m=3:
+sol=[1,2,0]: oggetti nei blocchi 0, 1, e 2.
+
+Output Completo per n=3
+1 blocco)
+{{1,2,3}}
+
+2 blocchi) 
+{{1,2},{3}}
+{{1,3},{2}}
+{{1},{2,3}}
+
+3 blocchi)
+{{1},{2},{3}}
+
+}
+
+
+void SP_rec(int n, int m, int pos, int *sol, int *val, int k) {
+ if (pos >= n) {
+  if (m == k) { //filtro
+   printf("partizione in esattamente %d blocchi: ",  m); 
+   for (int i=0; i<m; i++) {
+    for (int j=0; j<n; j++) {
+     if (sol[j] == i) //condizione se l'oggetto appartiene al blocco
+      printf("%d ", val[j]);
+      //stampo solo se il numero di blocchi è esattamente k -> il numero che voglio io
+     printf("\n");
+    }
+   }
+  }
+ }
+ 
+ for (int j=0; j<m; j++) {
+  sol[pos] = j;
+  SP_rec(n, m, pos+1, sol, val, k); //ricorro su oggetti
+ }
+ 
+ sol[pos] = m;
+ SP_rec(n, m+1, pos+1, sol, val, k); //ricorro su oggetti e blocchi
+}
+
+
+{
+Complessità esponenziale: dipende dal numero totale di partizioni, noto come numeri di Bell.
+n=3: ci sono 5 partizioni totali.
+n=4: ci sono 15 partizioni totali.
+}
+ 

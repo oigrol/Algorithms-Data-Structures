@@ -1,0 +1,99 @@
+Approccio enumerativo (senza pruning):
+ calcolare il powerset (val) (disposizioni ripetute)
+ per ogni sottoinsieme (condizione di terminazione), verificare se la somma dei suoi elementi è X.
+
+n = 2 scelte {0,1}
+k = 4 dimensione soluzione
+val = {2,1,6,4}
+genera tutti i sottoinsiemi di val che mi danno come somma X = 7
+
+per ogni passo decido se prendere o no l'elemento 
+
+
+void powerset(int pos, int *val, int *sol, int k, int X) {
+ if (pos>=k) {
+  if (checkSol(sol, val, k, X) {
+   for (int i=0; i<k; i++) {
+    if (sol[i] ==1)
+     printf("%d " val[i]);
+    printf("\n");
+   }
+  }
+ }
+ ecc....
+}
+
+
+
+
+
+int checkSol(int *sol, int *val, int k, int X) {
+ int somma=0;
+ for (int i=0; i<k; i++) {
+  if (sol[i] == 1) {
+   somma += val[i];
+  }
+ } 
+ if (somma == X) {
+  return 1;
+ }
+ return 0;
+}
+
+
+Approccio con pruning: strategia basata sulla valutazione
+della speranza:
+ si ordina in modo crescente val
+ p è la somma corrente (p = partial sum), inizialmente 0
+ r, inizialmente pari alla somma di tutti i valori di val,
+contiene la somma dei valori non ancora presi, quindi
+ancora disponibili (r = remaining sum)
+ ad ogni passo si prende in considerazione un elemento di
+val solo se “promettente”.
+Un elemento di val è promettente se:
+ la soluzione parziale + i valori che restano sono >=
+della somma cercata
+p + r >= X
+&&
+ la soluzione parziale + il valore di val è <= della somma
+cercata
+p + val[pos]<= X
+Se l’elemento è promettente:
+ lo si prende (sol[pos]=1)
+ si ricorre sul prossimo (pos+1), aggiornando p
+(p+val[pos]) e r (r-val[pos])
+ in fase di backtrack, non lo si prende (sol[pos]= 0)
+ si ricorre sul prossimo (pos+1), p resta invariato, r
+viene aggiornato (r-val[pos])
+Se l’elemento non è promettente, essendo il vettore val
+ordinato, anche tutti gli elementi che lo seguono sono «a
+fortiori» non promettenti:
+ se p + r < X tale somma non potrà aumentare
+considerando il prossimo elemento, indipendentemente
+dall’ordine
+ se p + val[pos] > X, poiché l’elemento successivo
+è > di quello corrente, la condizione ≤X non potrà mai
+essere soddisfatta.
+
+void sumset(int pos,int *val,int *sol,int p,int r,int X) {
+int j;
+if (p==X) {
+printf("\n{\t");
+for(j=0;j<pos;j++)
+if(sol[j])
+printf("%d\t",val[j]);
+printf("}\n");
+return;
+}
+if(promising(val,pos,p,r,X)){
+sol[pos]=1;
+sumset(pos+1,val,sol,p+val[pos],r-val[pos],X);
+sol[pos]=0;
+sumset(pos+1,val,sol,p, r-val[pos],X);
+}
+}
+
+int promising(int *val,int pos,int p,int r,int X) {
+return (p+r > =X)&&(p+val[pos]<=X);
+}
+A.

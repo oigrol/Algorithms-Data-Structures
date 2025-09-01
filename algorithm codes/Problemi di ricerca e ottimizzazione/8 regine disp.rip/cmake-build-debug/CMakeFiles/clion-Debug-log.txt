@@ -1,0 +1,1 @@
+CMakeLists.txt not found in C:\Users\loreg\Politecnico Di Torino Studenti Dropbox\Giovanni Lore\ALGORITMI E STRUTTURE DATI\Teoria\pdf\04 Esempi di  problemi di ricerca e ottimizzazione\8 regine disp.rip Select CMakeLists.txt

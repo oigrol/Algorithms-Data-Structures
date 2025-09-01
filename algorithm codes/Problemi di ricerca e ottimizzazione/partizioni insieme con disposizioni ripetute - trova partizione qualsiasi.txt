@@ -1,0 +1,111 @@
+Dati I e n=card(I), determinare:
+ una partizione qualsiasi
+
+ Il numero di oggetti memorizzati nel vettore val è n (cardinalità)
+ Il numero di decisioni da prendere è n, quindi il vettore sol
+contiene n celle (per ciascun elemento dobbiamo decidere a che blocco appartiene)
+ Il numero delle scelte possibili per ogni oggetto è il numero
+di blocchi, che varia tra 1 e k (scegliere a quale dei k blocchi associare elemento)
+ Ogni blocco è identificato da un indice i compreso tra 0 e k-1
+ sol[pos] contiene l’indice i del blocco cui appartiene
+l’oggetto di indice corrente pos.
+
+ È scambiato il ruolo di n e k rispetto agli altri esempi
+(dove n era il numero di scelte e k la dimensione della
+soluzione)
+ Si tratta di una generalizzazione del powerset
+rimuovendo il vincolo della scelta limitata a 0 oppure 1
+(prendo indice a cui blocco appartiene tra 0 e k-1)
+ Necessità di un controllo nella condizione di
+terminazione per evitare blocchi vuoti (calcolo delle
+occorrenze di ciascun blocco)
+ La funzione calcola tutte le partizioni. In seguito si
+vedrà come fermarsi alla prima.
+
+SOLITAMENTE ci basta generare solo una partizione -> CON disposizioni ripetute non posso farlo (non tengo conto di eventuali simmetrie -> Posso farlo con algoritmo di ER
+
+L'array occ tiene traccia del numero di elementi in ciascun blocco. Ecco un esempio:
+
+1. Supponiamo n=3 (tre elementi) e k=2 (due blocchi: {0 e 1}).
+2. combinazione [0,0,1]: occ sarà [2,1] (due elementi nel blocco 0, uno nel blocco 1).
+Soluzione accettata.
+3. combinazione [0,0,0]: occ sarà [3,0] (tre elementi nel blocco 0, nessuno nel blocco 1).
+Soluzione scartata.
+
+L'algoritmo genera tutte le disposizioni ripetute di n elementi su k blocchi e controlla che nessun blocco sia vuoto.
+
+ESEMPIO 
+n=3: ci sono 3 elementi (ad esempio indicati con {a,b,c}). 
+k=2: gli elementi possono essere assegnati a 2 blocchi (0 e 1)
+
+Generazione delle combinazioni:
+sol: vettore di lunghezza n che memorizza l'assegnazione di ciascun elemento.
+Combinazioni generate: [0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]
+
+Controllo dei blocchi vuoti:
+Per ogni combinazione, si calcola il numero di elementi in ciascun blocco con l'array occ:
+[0,0,0]:  → Blocco 1 vuoto → Scartata.
+
+[0,0,1]:  → Valida.
+
+[0,1,0]:  → Valida.
+
+[0,1,1]:  → Valida.
+
+[1,0,0]:  → Valida.
+
+[1,0,1]:  → Valida.
+
+[1,1,0]:  → Valida.
+
+[1,1,1]:  → Blocco 0 vuoto → Scartata.
+
+Output delle combinazioni valide:
+[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0]
+
+
+
+
+void disp_ripet(int pos, int *val, int *sol, int n, int k) {
+ int i, j, ok=1, occ; //ok condizione accettabilità soluzione
+ if (pos >= n) { 
+ //CONDIZIONE TERMINAZIONE -> ho deciso su tutti elementi
+ //devo poi vedere se accettabile (no blocchi vuoti)
+ //se trovo un blocco con cardinalità/num.elem=0 -> blocco vuoto -> soluzione inaccettabile
+  occ = calloc(k, sizeof(int));
+  for (j=0; j<n; j++)
+   occ[sol[j]]++;
+   //per ogni elemento j incremento occorrenze elemento nel blocco sol[j] specifico
+   //vettore di occorrenze dei blocchi -> registra il numero di elementi che appartengono a 
+   //ciascun blocco (tipo occ. semplici in counting sort) 
+  i=0;
+  while ((i<k) && ok) {
+   if (occ[i] == 0) ok=0;
+   i++;
+  }
+  free(occ);
+  if (ok == 0) return; //scarto soluzione
+  else {
+   STAMPA SOLUZIONE se blocco non vuoto;
+  }
+ }
+ for (i=0; i<k; i++) {
+  sol[pos] = i;
+  disp_ripet(pos+1, val, sol, n, k); 
+  //piazzo la scelta di blocco pos nel vettore sol ricorsivamente
+ }
+}
+
+se trovo un blocco vuoto
+segno che devo uscire dal 
+ciclo while
+-> soluzione scartata -> ok=0
+
+
+Differenze rispetto a powerset
+Il powerset è un sottoinsieme delle disposizioni ripetute, dove ogni elemento ha solo due scelte (inclusione o esclusione). Qui invece:
+
+Ogni elemento può essere assegnato a uno dei k blocchi.
+Non ci sono vincoli di esclusione tra gli elementi, quindi generiamo più combinazioni.
+Aggiungiamo il controllo sui blocchi vuoti.
+

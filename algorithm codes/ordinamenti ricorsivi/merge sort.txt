@@ -1,0 +1,211 @@
+COMPLESSITA'
+Dividi: calcola la metà di un vettore D(n)=(1)
+ Risolvi: risolve 2 sottoproblemi di dimensione n/2 ciascuno
+2T(n/2)
+ Terminazione: semplice test (1)
+ Combina: basata su Merge C(n) = (n) = theta(n)
+-->>
+T(n) = 2T(n/2) + n
+T(n) = O(n log n)
+Livelli di ricorsione: log{2}n (passi tot=livelli=altezza albero ricorsione (profondità))
+Operazioni per livello: n (per ogni livello sarebbero necessari n passi per fondere i vettori)
+Operazioni totali: n*log{2}n
+
+void mergeSort(int *A, int *B, int N) {
+ int l=0, r = N-1;
+ mergeSortR(A, B, l, r);
+}
+
+void mergeSortR(int *A, int *B, int l, int r) { //divide i sottovettori fino a farli diventare di un solo elemento
+ int m = (l+r) / 2;
+ if (l >= r)
+  return;
+ mergeSortR(A, B, l, m); 
+ mergeSortR(A, B, m+1, r);
+ merge(A, B, l, m, r);
+}
+
+void merge(int *A, int *B, int l, int m, int r) { //fonde i sottovettori in modo ordinato
+ int i=l, j=m+1;
+ for (int k=l; k <= r; k++) {
+  if (i>m) 
+   B[k] = A[j++];
+  else if (j>r) 
+   B[k] = A[i++];
+  else if (A[i] <= A[j])
+   B[k] = A[i++];
+  else
+   B[k] = A[j++];
+ }
+ for (int k=l; k<=r; k++) 
+  A[k] = B[k];
+ return;
+}
+
+
+non in loco - stabile - O(nlogn)
+n operazioni per livello, log(2)n livelli di ricorsione
+
+funzione di fusione di k vettori
+es: scrivi funzione che fa il merge di 3 o 4 o + vettori (domanda orale programmazione)
+#include <limits.h>
+void merge(int *A, int nA, int *B, int nB, int *C, int nC, int *D, int nD, int *Result) {
+ int i = j = k = h = index = 0;
+ while (i<nA || j < nB || k < nC || h < nD) {
+  int min = INT_MAX, id=-1;
+  if (i < sizeA && A[i] < min) {
+   min = A[i];
+   id = 0;
+  }
+  if (j < sizeB && B[j] < min) {
+   min = B[j];
+   id = 1;
+  }
+  if (k < sizeC && C[k] < min) {
+   min = C[k];
+   id = 2;
+  }
+  if (h < sizeD && D[h] < min) {
+   min = D[h];
+   id = 3;
+  }
+  // Copia il valore minimo trovato nell'array risultato
+  Result[index++] = min;
+  
+  // Avanza il puntatore dell'array da cui è stato estratto il valore minimo
+  if (src == 0) i++;
+  else if (src == 1) j++;
+  else if (src == 2) k++;
+  else if (src == 3) h++;
+ }
+}  
+
+(TRUCCO per avere nA: int sizeA = sizeof(A) / sizeof(A[0]);)
+
+OPPURE
+//salvo tutti i vettori in un unico grande vettore / vettore di puntatori a vettore
+int *arrays[] = {a, b, c, d};
+mergeKSortedArrays(arrays, 3, sizes, mergedArray, totalSize);
+
+void merge(int *A, int *B, int left, int mid, int right) {
+    int i = left, j = mid + 1;
+    for (int k = left; k <= right; k++) {
+        if (i > mid) 
+            B[k] = A[j++];
+        else if (j > right) 
+            B[k] = A[i++];
+        else if (A[i] <= A[j]) 
+            B[k] = A[i++];
+        else 
+            B[k] = A[j++];
+    }
+    for (int k = left; k <= right; k++) 
+        A[k] = B[k];
+}
+
+void mergeKSortedArraysR(int *A, int *B, int left, int right) {
+    if (left >= right) return;
+
+    int mid = (left + right) / 2;
+    mergeKSortedArraysR(A, B, left, mid);
+    mergeKSortedArraysR(A, B, mid + 1, right);
+    merge(A, B, left, mid, right);
+}
+
+void mergeKSortedArrays(int **arrays, int k, int *sizes, int *mergedArray, int totalSize) {
+    int index = 0;
+
+    // Unisco tutti i vettori in un unico array
+    for (int i = 0; i < k; i++) {
+        for (int j = 0; j < sizes[i]; j++) {
+            mergedArray[index++] = arrays[i][j];
+        }
+    }
+
+    int *B = (int *)malloc(totalSize * sizeof(int));
+    mergeKSortedArraysR(mergedArray, B, 0, totalSize - 1);
+    free(B);
+}
+
+
+Approccio con Min-Heap - complessità ottimale 𝑂(𝑛log𝑘), dove n è la somma delle lunghezze dei vettori.
+Inseriamo il primo elemento di ogni vettore in una min-heap.
+Estraiamo il minimo dalla heap e lo inseriamo nel risultato.
+Se il minimo estratto apparteneva al vettore i, inseriamo il successivo elemento del vettore i (se esiste).
+Ripetiamo fino a svuotare la heap.
+
+typedef struct {
+    int value;
+    int array_index;
+    int next_index;
+} HeapNode;
+
+void swap(HeapNode *a, HeapNode *b) {
+    HeapNode temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void heapify(HeapNode heap[], int size, int i) {
+    int smallest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < size && heap[left].value < heap[smallest].value)
+        smallest = left;
+    if (right < size && heap[right].value < heap[smallest].value)
+        smallest = right;
+    if (smallest != i) {
+        swap(&heap[i], &heap[smallest]);
+        heapify(heap, size, smallest);
+    }
+}
+
+void buildHeap(HeapNode heap[], int size) {
+    for (int i = size / 2 - 1; i >= 0; i--)
+        heapify(heap, size, i);
+}
+
+int* mergeKSortedArrays(int **arrays, int k, int *sizes, int *mergedSize) {
+    int total_size = 0;
+    for (int i = 0; i < k; i++)
+        total_size += sizes[i];
+
+    *mergedSize = total_size;
+    int *result = (int *)malloc(total_size * sizeof(int));
+
+    HeapNode *heap = (HeapNode *)malloc(k * sizeof(HeapNode));
+    int heapSize = 0;
+
+    for (int i = 0; i < k; i++) {
+        if (sizes[i] > 0) {
+            heap[heapSize++] = (HeapNode){arrays[i][0], i, 1};
+        }
+    }
+
+    buildHeap(heap, heapSize);
+
+    int index = 0;
+    while (heapSize > 0) {
+        result[index++] = heap[0].value;
+        int array_index = heap[0].array_index;
+        int next_index = heap[0].next_index;
+
+        if (next_index < sizes[array_index]) {
+            heap[0] = (HeapNode){arrays[array_index][next_index], array_index, next_index + 1};
+        } else {
+            heap[0] = heap[heapSize - 1];
+            heapSize--;
+        }
+        heapify(heap, heapSize, 0);
+    }
+
+    free(heap);
+    return result;
+}
+
+    int *arrays[] = {a, b, c};
+    int sizes[] = {3, 4, 5};
+    int mergedSize;
+
+    int *merged = mergeKSortedArrays(arrays, 3, sizes, &mergedSize);

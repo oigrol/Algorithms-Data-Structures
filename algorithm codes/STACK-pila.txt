@@ -1,0 +1,94 @@
+o STACKpush : inserimento in cima
+o STACKpop : preleva (e cancella) dalla cima l’oggetto inserito più di recente
+
+LIFO (Last In First Out)
+
+▪ con vettore
+o quasi ADT
+o ADT di I classe
+▪ con lista
+o quasi ADT
+o ADT di I classe
+
+Vettore vs. lista: vantaggi/svantaggi
+Spazio:
+▪ vettore: spazio allocato sempre pari al massimo previsto, vantaggioso per stack quasi 
+pieni  ->  NON viene controllato il rispetto dei casi limite (pop da stack vuoto o push
+in stack pieno) -> suggerimento: implementare i controlli
+▪ lista: spazio utilizzato proporzionale al numero di elementi correnti, vantaggioso 
+per stack che cambiano rapidamente dimensione
+ push : inserzione in testa
+ pop: estrazione dalla testa
+Tempo:
+▪ push e pop T(n) = O(1)
+inserimenti e cancellazione che non dipendono dalla dimensione
+
+Quasi ADT vs. ADT I classe
+Quasi ADT
+▪implementazione mediante variabili globali (dichiarate fuori da funzioni) e invisibili da altri file sorgenti (static)
+
+ADT di I classe
+▪una struct puntata (da handle), contenente, come campi, la variabili globali del quasi ADT.
+
+vettore
+stack.h
+typedef struct stack *STACK;
+STACK STACKinit(int maxN); int STACKempty(STACK s); void STACKpush(STACK s,
+Item val);
+Item STACKpop (STACK s);
+
+stack.c
+struct stack { Item *s; int N; };
+STACK STACKinit(int maxN) {
+STACK sp = malloc(sizeof *sp) ;
+sp->s = malloc(maxN*sizeof(Item));
+sp->N=0;
+return sp;
+}
+int STACKempty(STACK sp) { 
+return sp->N == 0;
+}
+void STACKpush(STACK s, Item val) { 
+sp->s[sp->N++] = val;
+}
+Item STACKpop(STACK s) {
+return sp->s[--(sp->N)];
+}
+
+lista
+stack.h
+typedef struct stack *STACK;
+STACK STACKinit(int maxN);
+int STACKempty (STACK s);
+void STACKpush (STACK s, Item val);
+Item STACKpop (STACK s);
+
+stack.c
+typedef struct STACKnode* link;
+struct STACKnode {Item val; link next;};
+struct stack { link head; };
+static link NEW (Item val, link next){ 
+link x = (link) malloc(sizeof *x); 
+x->val = val;
+x->next = next;
+return x;
+}
+STACK STACKinit(int maxN) { 
+STACK s = malloc(sizeof *s) ; 
+s->head = NULL;
+return s;
+}
+int STACKempty(STACK s) {
+return s->head == NULL;
+}
+void STACKpush(STACK s, Item val) { 
+s->head = NEW(val, s->head); 
+}
+Item STACKpop (STACK s) {
+Item tmp;
+tmp = s->head->val; 
+link t = s->head->next; 
+free(s->head);
+s->head = t;
+return tmp;
+}

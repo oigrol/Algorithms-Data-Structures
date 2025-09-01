@@ -1,0 +1,102 @@
+discreto
+ Problema P(N, cap)
+ Sottoproblema P(i, cap): problema per i primi i oggetti
+ S(i, cap): soluzione ottima per P(i, cap)
+ 2 casi:
+ l’oggetto i (ultimo degli oggetti correnti) appartiene
+alla soluzione ottima
+ l’oggetto i non appartiene alla soluzione ottima
+Il numero di sottoproblemi indipendenti è (Ncap): la
+programmazione dinamica è conveniente.
+Valutazione delle convenienza: termini di paragone:
+ maxv[i-1,j]: massimo valore con capacità disponibile j
+considerando gli oggetti da 0 a i-1, quindi non l’oggetto i
+ v[i] + maxv[i-1,j-w[i]]: valore dell’oggetto i sommato al massimo
+valore ottenuto considerando gli oggetti da 0 a i-1 e una capacità
+disponibile j-w[i] tale da poter contenere l’oggetto i di peso w[i]
+Se maxv[i-1,j]  v[i] + maxv[i-1,j-w[i]]
+ non prendo l’oggetto i e maxv[i,j] = maxv[i-1,j]
+ altrimenti prendo l’oggetto i e maxv[i,j] = v[i] + maxv[i-1,j-w[i]].
+
+int maxValR(Item *items, int i, int j) {
+if ( (i < 0) || (j == 0))
+return 0;
+if (items[i].size >j)
+return maxValR(items, i-1, j);
+return max(maxValR(items, i-1, j),
+maxValR(items,i-1,j-items[i].size)+items[i].value);
+}
+int KNAPmaxVal(Item *items, int N, int cap) {
+return maxValR(items, N, cap);
+}
+
+PROGR. DINAMICA
+ vettore items di N elementi
+ tabella (N+1)x(cap+1) maxVal[0…N, 0…cap] per
+memorizzare i valori e identificare il massimo
+ non serve un’ulteriore struttura dati per la costruzione
+dalla soluzione
+Passi:
+ 2 cicli for annidati di scansione degli N oggetti (i da 1 a N) e della
+capacità (j da 1 a cap)
+ l’oggetto corrente i si trova in items[i-1]
+ se il peso dell’oggetto corrente items[i-1].size eccede la capacità
+disponibile j, l’oggetto non viene preso e maxval[i, j] = maxval[i-1, j]
+ altrimenti si valuta se l’oggetto corrente conviene come nella
+soluzione ricorsiva.
+Valutazione delle convenienza: termini di paragone:
+ maxval[i-1,j]: massimo valore con capacità disponibile j considerando gli
+oggetti da 0 a i-1, quindi non l’oggetto i
+ items[i-1].value + maxv[i-1,j-items[i-1].size]: valore dell’oggetto i sommato
+al massimo valore ottenuto considerando gli oggetti da 0 a i-1 e una
+capacità disponibile j-items[i-1].size tale da poter contenere l’oggetto i di
+peso items[i-1].size
+Se maxval[i-1,j]  maxval[i-1][j-items[i-1].size] + items[i-1].value
+ non prendo l’oggetto i e maxval[i,j] = maxval[i-1,j]
+ altrimenti prendo l’oggetto i e
+maxval[i,j] = maxval[i-1][j-items[i-1].size] + items[i-1].value
+
+int KNAPmaxValDP(Item *items, int N, int cap) {
+int i, j, **maxval;
+// allocazione matrice maxval di dimensioni (N+1)x(cap+1)
+for (i=1; i<=N; i++)
+for (j=1; j <=cap; j++) {
+if (items[i-1].size > j)
+maxval[i][j] = maxval[i-1][j];
+else
+maxval[i][j] = max(maxval[i-1][j],
+maxval[i-1][j-items[i-1].size] +
+items[i-1].value);
+}
+}
+printf("Maximum booty is: \n");
+displaySol(items, N, cap, maxval);
+printf("\n");
+return maxval[N][cap];
+}
+COSTRUZIONE DISPLAY SOL
+Iterazione: partendo da maxval[N][cap] si scandiscono tutti gli oggetti:
+ se la stima maxval[i][j] che include l’oggetto corrente i è uguale a
+quella che non lo include maxval[i-1][j] significa che l’oggetto
+corrente i non è stato preso, quindi sol[i-1] = 0
+ altrimenti l’oggetto corrente i è stato preso (sol[i-1]=1). L’oggetto
+preso ha «consumato» una certa capacità, quindi j viene aggiornato a
+j – items[i-1].size.
+void displaySol(Item *items, int N, int cap, int **maxval){
+int i, j, *sol;
+sol = calloc(N, sizeof(int));
+j = cap;
+for (i=N; i>=1; i--)
+if (maxval[i][j] == maxval[i-1][j])
+sol[i-1] = 0;
+else {
+sol[i-1] = 1;
+j-= items[i-1].size;
+}
+for (i=0; i<N; i++)
+if (sol[i])
+ITEMstore(items[i]);
+}
+
+KNAPmaxValDP: T(n) = (N cap): conta solo il numero di
+sottoproblemi, in quanto ognuno ha costo (1).

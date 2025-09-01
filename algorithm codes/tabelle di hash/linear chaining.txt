@@ -1,0 +1,60 @@
+typedef struct STnode *link;
+struct STnode { Item item ; link next ; }
+struct symbtab { link *heads; int N; int M; link z; };
+
+XXX inserimento
+void STinsert(ST st, item val) {
+ int i;
+ i = hash(KEYget(&val), st->M);
+ st->heads[i] = newNode(val, st->heads[i];
+}
+static link NEW( Item item, link next) {
+ link x = malloc(sizeof *x); 
+ x->item = item;
+ x->next = next; 
+ return x;
+}
+
+XXX ricerca
+Item STsearch (ST st , Key k) {
+ return searchR (st->heads[hash(k, st->M)], k, st->z);
+}
+Item searchR (link t, Key k, link z) {
+ if (t == z) return ITEMsetNull
+ if (KEYcmp(KEYget(&t -->item), k))==0) return t->item;
+ return searchR (t->next , k, z);
+}
+
+XXX cancellazione
+void STdelete (ST st , Key k) {
+ int i = hash(k, st->M);
+ st->heads[i] = deleteR(st->heads[i], k);
+}
+link deleteR (link x, Key k) {
+ if (x == z) return NULL;
+ if (KEYcmp(KEYget(&x->item), k))==0) {
+  link t = x->next ;
+  free(x);
+  return t;
+ }
+ x->next = deleteR(x->next, k);
+ return x;
+}
+
+trovare maxN <= 53 (valore di M = primo numero primo maggiore del numero di chiavi / r, dove r = 5, 10, in base a max lunghezza liste che voglio)
+static int STsizeSet(int maxN, float r) {
+ int primes[16]={2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53};
+ int i = 0; 
+ int size;
+ size = maxN /r;
+ if (size < primes[15]) {
+ for (i = 0; i<16; i++) 
+  if (size <= primes[i])
+  return primes[i];
+ }
+ else
+  printf("Too many entries!\n");
+ return -1;
+}
+
+

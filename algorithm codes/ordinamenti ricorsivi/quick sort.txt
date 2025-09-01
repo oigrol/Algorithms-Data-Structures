@@ -1,0 +1,56 @@
+COMPLESSITA'
+Efficienza legata al bilanciamento delle partizioni
+A ogni passo partition ritorna:
+ caso peggiore: un vettore da n-1 elementi e l’altro da 1 elemento (T(n)=n+T(n-1) [+T(1)])
+  sum[da 1 a n]{i} = 1/2 * n * (n+1) -> sommatoria di Gauss -> T(n) = O(n^2)
+ caso migliore: due vettori da n/2 elementi (T(n)=n + 2T(n/2)) -> T(n) = O(n lgn)
+ caso medio: due vettori di dimensioni diverse. (approssimabile al caso migliore, purché 
+  non si ricada nel caso peggiore, anche se il partizionamento è molto sbilanciato) ->
+  T(n) = O(n lg n)
+Bilanciamento legato alla scelta del pivot.
+SCELTA PIVOT
+ Elemento di mezzo: x <- A[(l+r)/2]
+ Scegliere il valore medio tra min e max
+ Scegliere la mediana tra 3 elementi presi a caso nel vettore
+Se lo scopo è semplicemente di rendere molto improbabile il caso peggiore, basta generare un numero casuale i con l <= i <= r, poi scambiare A[r] e A[i] e infine usare come pivot A[r].
+
+void quickSort(int *A, int N) {
+ int l=0, r=N-1;
+ quickSortR(A, l, r);
+}
+
+void quickSortR(int *A, int l, int r) {
+ int m;
+ if (l >= r) 
+  return;
+ m = partition(A, l, r);
+ quickSortR(A, l, m-1);
+ quickSortR(A, m+1, r);
+ return;
+}
+
+//PS: esiste anche la partition à la Lomuto.
+int partition(int *A, int l, int r) { // Partition (à la Hoare) : T(n) = (n).
+ int i = l-1, j = r;
+ int pivot = A[r];
+ for ( ; ; ) { //ciclo apparent infinito: non c'è terminazione però viene inserito un break
+  while (A[++i] < pivot); //cicli no corpo. trovano celle con valore più grande del pivot
+  while (A[--j] > pivot);
+  if (i >= j) 
+   break;
+  swap(A, i, j);
+ }
+ swap(A, i, r); //scambio i con pivot alla fine
+ return i;
+}
+
+void swap(int *A, int i, int j) {
+ int temp = A[i];
+ A[i] = A[j];
+ A[j] = temp;
+ return;
+}
+
+in loco, non stabile,
+caso peggiore O(n^2) [il pivot è già il max, min di un vettore ordinato all'opposto]
+caso migliore/medio O(nlogn)

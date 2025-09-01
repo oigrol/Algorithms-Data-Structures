@@ -1,0 +1,96 @@
+Set.h
+typedef struct set *SET;
+
+SET SETinit(int maxN);
+void SETfree(SET s);
+void SETfill(SET s, Item val); 
+int  SETsearch(SET s, Key k); 
+SET  SETunion(SET s1, SET s2);
+SET  SETintersection(SET s1, SET s2); 
+int  SETsize(SET s);
+int  SETempty(SET s);
+void SETdisplay(SET s);
+
+Implementazioni possibili
+▪ vettore
+o non ordinato
+o ordinato
+▪ lista
+o non ordinata
+o Ordinata
+▪ Perche NON si adotta una soluzione stile union-find (vettore con accesso diretto e  corrispondenza dato-indice)?
+o Nella union-find un elemento appartiene a UN SOLO INSIEME
+o Il caso generale è diverso. Un elemento può appartenere a più insiemi, che supportano operazioni di unione, intersezione, differenza, ecc.
+
+□    complessità della funzione SETsearch di appartenenza:
+o vettore ordinato ⇒ ricerca dicotomica  ⇒ O(logN)
+o vettore non ordinato ⇒ ricerca lineare  ⇒ O(N)
+o lista (ordinata/non ordinata)  ⇒ ricerca lineare  ⇒ O(N)
+□    complessità delle funzioni SETunion e SETintersection:
+o vettore/lista ordinato ⇒ O(N)
+o vettore/lista non ordinato ⇒ O(N²)
+
+SETintersection (Scelta libera di implementazione)
+1.	Vettori ordinati → Merge-like scan (2 puntatori):
+o	Si scorrono entrambi gli array con due puntatori e si raccolgono gli elementi comuni.
+o	Complessità: O(N+M)O(N+M)O(N+M).
+void setIntersectionSorted(int A[], int sizeA, int B[], int sizeB) {
+    int i = 0, j = 0;
+
+    while (i < sizeA && j < sizeB) {
+        if (A[i] == B[j]) {
+            printf("%d ", A[i]);
+            i++;
+            j++;
+        } else if (A[i] < B[j]) {
+            i++;
+        } else {
+            j++;
+        }
+    }
+}
+2.	Vettori non ordinati → Uso di un HashSet:
+o	Inserire il primo insieme in una hash table, poi verificare gli elementi del secondo insieme.
+o	Complessità: O(N+M)O(N + M)O(N+M) in media.
+#define TABLE_SIZE 100
+
+int hashTable[TABLE_SIZE] = {0};  // Hashtable 
+
+void setIntersectionHash(int A[], int sizeA, int B[], int sizeB) {
+    for (int i = 0; i < sizeA; i++)
+        hashTable[A[i] % TABLE_SIZE] = 1;
+
+    for (int j = 0; j < sizeB; j++) {
+        if (hashTable[B[j] % TABLE_SIZE]) {
+            printf("%d ", B[j]);
+        }
+    }
+}
+3.	Liste concatenate:
+o	Se ordinate → stesso metodo dei vettori ordinati O(N+M)O(N+M)O(N+M).
+o	Se non ordinate → usa hash table O(N+M)O(N+M)O(N+M) in media o sorting + scan O(Nlog⁡N+Mlog⁡M)O(N \log N + M \log M)O(NlogN+MlogM).
+typedef struct Node *link;
+typedef struct Node {
+    int value;
+    link next;
+} Node;
+
+void setIntersectionList(link A, link B) {
+    while (A && B) {
+        if (A->value == B->value) {
+            printf("%d ", A->value);
+            A = A->next;
+            B = B->next;
+        } else if (A->value < B->value) {
+            A = A->next;
+        } else {
+            B = B->next;
+        }
+    }
+}
+📌 Quale scegliere?
+•	Se gli insiemi sono già ordinati → Metodo con due puntatori.
+•	Se gli insiemi sono piccoli → Lista non ordinata con scansione O(NM)O(NM)O(NM).
+•	Se gli insiemi sono grandi e non ordinati → Hash table.
+
+

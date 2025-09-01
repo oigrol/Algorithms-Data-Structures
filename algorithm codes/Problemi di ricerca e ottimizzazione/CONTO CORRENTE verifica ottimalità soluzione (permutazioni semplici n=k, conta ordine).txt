@@ -1,0 +1,42 @@
+VERIFICA OTTIMALITA' SOLUZIONE CON PERMUTAZIONI SEMPLICI
+
+#include <limits.h>
+int min_diff = INT_MAX;
+&min_diff;
+
+int perm_sempl(int pos, int *val, int *sol, int *best_sol, int *best_diff, int n, int *mark, int count) {
+ if (pos >= n) {
+  if (checkSol(sol, best_sol, best_diff, n)) {
+   for (int i=0; i<n; i++) {
+    best_sol[i] = sol[i];
+   return count+1;
+  }
+ }
+
+ for (int j=0; j<n; j++) {
+  if (mark[j] == 0) {
+   mark[j] = 1;
+   sol[pos] = val[j];
+   count = perm_sempl(pos+1, val, sol, n, mark, count);
+   mark[j] = 0; //backtrack
+  }
+ }
+ return count;
+}
+
+int checkSol(int *sol, int *best_sol, int *best_diff, int n) {
+ int saldo_tot=0, saldo_max=0, saldo_min = INT_MAX, differenza;
+ for (int i=0; i<n; i++) {
+  saldo_tot += sol[i];
+  if (saldo_tot > saldo_max) 
+   saldo_max = saldo_tot;
+  if (saldo_tot < saldo_min) 
+   saldo_min = saldo_tot;
+ }
+ differenza = saldo_max-saldo_min;
+ if (differenza < best_diff) {
+  *best_diff = differenza;
+  return 1;
+ }
+ return 0;
+}

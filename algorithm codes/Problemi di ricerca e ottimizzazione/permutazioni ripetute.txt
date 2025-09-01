@@ -1,0 +1,64 @@
+permutazioni ripetute  (caso particolare di disposizioni con n=k)
+conta l'ordine 01 != 10
+il numero n di elementi totali da inserire è uguale al numero n di elementi della soluzione che si possono inserire
+si ripetizioni 
+ES: data una stringa con lettere eventualmente ripetute, genera tutti i suoi anagrammi distinti
+n=3
+val = ORO
+n_dist = 2
+dist_val = {O, R}
+sol = {OOR, ORO, ROO}
+num_sol = n!/r! = 3
+
+USO VETTORE MARK, Perché NON LAVORO CON UN SOLO INSIEME MA CON MULTI INSIEMI CON AL SUO INTERNO TANTI ELEMENTI CON LA LORO Molteplicità (NO CLONI NELLO STESSO INSIEME)
+n = Cardinalità MULTINSIEME
+dopo aver ordinato vettore val (O(nlogn)), vi si eliminano le ripetizioni/duplicati e si memorizza in
+vettore dist_val[n_dist] (O(n))
+
+MARK[N_DIST] memorizza per ogni elemento corrispondente all'indice il numero di occorrenze
+elemento preso mark[i]-- (se >0) al ritorno mark[i]++
+
+val = malloc(n*sizeof(int));
+dist_val = malloc(n*sizeof(int)); //sovralloco max n elem
+sol = malloc(n*sizeof(int));
+mark = calloc(n, sizeof(int));
+
+
+mergeSort(val);
+int flag, n_dist, k=0;
+for (int i=0; i<n; i++) {
+ flag = 1;
+ for (int j=0; j<n && flag != 0; j++)
+  if (val[i] == dist_val[j]) {
+   flag = 0;
+   mark[j]++;
+ if (flag == 1) {
+  mark[k] = 1;
+  dist_val[k++] = val[i]; 
+  n_dist = n_dist+1;
+ }
+}
+
+perm_r(0, dist_val, n_dist, sol, n, mark, count)
+
+
+int perm_r(int pos, int *dist_val, int n_dist, int *sol, int n, int *mark, int count) {
+ if (pos >= n) {
+  for (int i=0; i<n; i++) {
+   printf("%d ", sol[i]);
+  }
+  printf("\n");
+  return count+1;
+ }
+
+ for (int j=0; j<n_dist; j++) {
+  if (mark[j] > 0) {
+   mark[j]--;
+   sol[pos] = dist_val[j];
+   count = perm_r(pos+1, dist_val, n_dist, sol, n, mark, count);
+   mark[j]++; //backtrack
+  }
+ }
+ return count;
+}
+

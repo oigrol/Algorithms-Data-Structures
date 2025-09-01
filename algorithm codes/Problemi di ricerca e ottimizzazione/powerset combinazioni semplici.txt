@@ -1,0 +1,44 @@
+stiamo costruendo sottoinsiemi -> quindi l'ordine degli elementi è irrilevante (non serve disposizioni ripetute)
+costruisco tutti gli n elementi presi a k a k
+ATT: combinazioni non ragionano con k=0 -> non posso costruire insieme vuoto -> devo aggiungerlo io manualmente
+
+
+Unione di insieme vuoto e insieme delle parti degli
+insiemi con j = 1, 2, 3, …., n elementi
+ Trattandosi di insiemi l’ordine non conta
+ Modello: combinazioni semplici di n elementi presi a
+gruppi di j con j che va da 1 a n
+ il wrapper si occupa dell’unione dell’insieme vuoto (non
+generato dalle combinazioni) e dell’iterare la chiamata
+alla funzione ricorsiva delle combinazioni.
+
+
+int powerset(int *val, int n, int *sol) {
+ int count = 0;
+ printf("{ }\n"); //stampo insieme vuoto che la combinazione non stampa
+ count++; //segno che ho generato una soluzione insieme vuoto
+ for (int k=1; k<n; k++) {
+  count += powerset_r(0, val, n, sol, k, 0); //genera prima soluzioni da 1 elemento, fino ad arrivare all'insieme totale con l'ultima iterazione del ciclo
+ }
+ return count;
+}
+
+//in sol salvo direttamente il valore
+int powerset_r(int pos, int *val, int n, int *sol, int k, int start) {
+ if (pos >= k) {
+  for (int i=0; i<k; i++) {
+   printf("%d ", sol[i]);
+  }
+  printf("\n");
+  return 1;
+ }
+   
+ for (int j=start; j<n; j++) { 
+  //per tutti gli elementi da start in poi, non devo generare insiemi simmetrici con stessi   
+  //elementi in ordine diverso
+  sol[pos] = val[j];
+  count += powerset_r(pos+1, val, n, sol, k, j+1); //itero su prossima decisione partendo 
+                                                     da elemento a seguire
+ }
+ return count;
+}

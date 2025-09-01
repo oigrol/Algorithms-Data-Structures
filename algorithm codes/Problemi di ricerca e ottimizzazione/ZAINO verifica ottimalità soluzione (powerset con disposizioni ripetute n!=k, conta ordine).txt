@@ -1,0 +1,79 @@
+Item val {
+Nome A B C D
+value vi 10 6 8 9
+size wi 8 4 2 3
+}
+n=4, cap = 10;
+k= dim. max. sol = 4
+
+best_val = 0;
+int powerset(0, val, n, sol, k, best_sol, &best_val, 0, cap, 0, 0) {
+
+
+
+int powerset(int pos, item *val, int n, int sol, int k, int *best_sol, int *best_val, int count, int cap, int curr_cap, int curr_val) {
+ if (pos >= k) {
+  if (curr_val > *best_val)) {
+   *best_val = curr_val;
+   for (int i=0; i<k; i++) {
+    bestSol[i] = sol[i];
+   }
+  }
+ return count+1;
+ }
+ 
+ //prendo aggiorno cap e val / no prendo tolgo cap e val
+
+ if (curr_cap + val[pos].size > cap) { //pruining = se supero la capacità nello zaino lascio oggetto e ricorro al prossimo
+  sol[pos] = 0; 
+  powerset(pos+1, val, n, sol, k, best_sol, best_val, count);
+  return count;
+ }
+
+ //SI prendo
+ sol[pos] = 1;
+ curr_cap += val[pos].size;
+ curr_val += val[pos].value; 
+ powerset(pos+1, val, n, sol, k, best_sol, best_val, count);
+
+ //NO prendo
+ sol[pos] = 0; 
+ curr_cap -= val[pos].size;
+ curr_val -= val[pos].value;
+ powerset(pos+1, val, n, sol, k, best_sol, best_val, count);
+
+ return count;
+}
+
+
+Approccio con pruning: disposizioni ripetute (powerset)
+funzione di pruning: se, prendendo un oggetto, la capacità
+utilizzata eccede quella massima, l’oggetto non viene scelto
+void powerset(int pos,Item *items,int *sol,int k,int cap,
+int c_cap,int c_val,int *b_val,int *b_sol) {
+int j;
+if (pos >= k) {
+if (c_val > *b_val) {
+for (j=0; j<k; j++)
+b_sol[j] = sol[j];
+*b_val = c_val;
+}
+return;
+}
+if ((c_cap + items[pos].size) > cap) {
+sol[pos] = 0;
+powerset(pos+1,items,sol,k,cap,c_cap,c_val,b_val,b_sol);
+return;
+}
+sol[pos] = 1;
+c_cap += items[pos].size;
+c_val += items[pos].value;
+powerset(pos+1,items,sol,k,cap,c_cap,c_val,b_val,b_sol);
+sol[pos] = 0;
+c_cap -= items[pos].size;
+c_val -= items[pos].value;
+powerset(pos+1,items,sol,k,cap,c_cap,c_val,b_val,b_sol);
+}
+Rispetto a powerset senza pruning, manca la condizione di accettazione, perchè ho verificato accettibilità di soluzione prima di generarla, non dopo averla generata
+tutte le soluzioni generate sono accettabili
+

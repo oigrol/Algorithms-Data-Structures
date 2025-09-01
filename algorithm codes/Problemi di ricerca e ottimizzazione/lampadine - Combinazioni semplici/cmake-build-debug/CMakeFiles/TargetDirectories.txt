@@ -1,0 +1,3 @@
+C:/Users/loreg/Politecnico Di Torino Studenti Dropbox/Giovanni Lore/ALGORITMI E STRUTTURE DATI/Teoria/pdf/04 Esempi di  problemi di ricerca e ottimizzazione/Combinazioni semplici/cmake-build-debug/CMakeFiles/Combinazioni_semplici.dir
+C:/Users/loreg/Politecnico Di Torino Studenti Dropbox/Giovanni Lore/ALGORITMI E STRUTTURE DATI/Teoria/pdf/04 Esempi di  problemi di ricerca e ottimizzazione/Combinazioni semplici/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/loreg/Politecnico Di Torino Studenti Dropbox/Giovanni Lore/ALGORITMI E STRUTTURE DATI/Teoria/pdf/04 Esempi di  problemi di ricerca e ottimizzazione/Combinazioni semplici/cmake-build-debug/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,132 @@
+quasi ADT
+con tipo visibile al client (che può tuttavia ignorare la visibilità), non
+necessariamente dinamico
+ADT di I classe
+dato nascosto, ma allocazione dinamica e puntatori
+L’ ADT di I classe:
+1. nasconde al client i dettagli
+2. permette al client di istanziare più variabili del tipo dell’ADT
+
+item.h
+Key KEYget (Item val);
+Key KEYscan();
+int KEYcompare(Key k1, Key k2);
+Item ITEMnew();
+void ITEMfree (Item val);
+Item ITEMscan();
+void ITEMshow (Item val);
+int ITEMless (Item val1, Item val2);
+int ITEMgreater (Item val1, Item val2);
+int ITEMcheckvoid (Item val);
+Item ITEMsetvoid();
+
+Quasi ADT Item
+SELEZIONE DI ATTIVITà
+Item.h
+typedef struct {
+char name[MAXC];
+int start;
+int stop;
+int selected;
+} Item;
+typedef int Key;
+int ITEMlt(Item A, Item B);
+int ITEMgt(Item A, Item B);
+Item ITEMscan();
+void ITEMstore(Item A);
+Key KEYgetStart(Item A);
+Key KEYgetStop(Item A);
+Key KEYgetSel(Item A);
+void KEYsetSel(Item *pA);
+
+Item.c
+Item ITEMscan() {
+Item A;
+printf("name, start, stop: ");
+scanf("%s %d %d", A.name, &A.start, &A.stop);
+return A;
+}
+void ITEMstore(Item A) {
+printf("name= %s \t start= %d \t stop = %d \n",
+A.name, A.start, A.stop);
+}
+int ITEMlt(Item A, Item B) {
+return (A.stop < B.stop);
+}
+int ITEMgt(Item A, Item B) {
+return (A.stop > B.stop);
+}
+
+Key KEYgetStop(Item A) {
+return A.stop;
+}
+Key KEYgetStart(Item A) {
+return A.start;
+}
+Key KEYgetSel(Item A) {
+return A.selected;
+}
+void KEYsetSel(Item *pA){
+pA->selected = 1;
+}
+
+ZAINO
+Item.h
+typedef struct {char n[MAX]; float w; float v;
+float r; float f; } Item;
+typedef float Key;
+int ITEMeq(Item A, Item B);
+int ITEMgt(Item A, Item B);
+Item ITEMscan();
+void ITEMstore(Item A);
+Key KEYgetW(Item A);
+Key KEYgetV(Item A);
+Key KEYgetF(Item A);
+void KEYsetF(Item *pA, float f);
+Item ITEMscan() {
+printf("name, weight, value: ");
+scanf("%s %f %f", A.name, &(A.w), &(A.v);
+A.r = A.v/A.w;
+return A;
+}
+void ITEMstore(Item A) {
+printf("name= %s \t weight= %.2f \t value = %.2f \t
+fract= %.2f \n", A.name, A.w, A.v, A.f);
+}
+int ITEMeq(Item A, Item B) {return (A.r == B.r);}
+int ITEMgt(Item A, Item B) {return (A.r > B.r);}
+Key KEYgetW(Item A) {return (A.w);}
+Key KEYgetV(Item A) {return (A.v);}
+Key KEYgetF(Item A) {return (A.f);}
+void KEYsetF(Item *pA, float f) {pA->f = f;}
+
+main.c
+float knapsack(int n, Item *objects, float cap) {
+float stolen = 0.0, res = cap;
+int i;
+for (i=0; i<n && (KEYgetW(objects[i]) <= res);i++) {
+KEYsetF(&objects[i], 1.0);
+stolen = stolen + KEYgetV(objects[i]);
+res = res - objects[i].weight;
+}
+KEYsetF(&objects[i], res/KEYgetW(objects[i]));
+stolen = stolen + KEYgetF(objects[i])*KEYgetV(objects[i]);
+return stolen;
+}
+
+int main() {
+int n, i; float cap, stolen=0.0; Item *objects;
+printf("No. of objects: "); scanf("%d", &n);
+objects = calloc(n, sizeof(Item));
+printf("Input objects: \n");
+for (i=0; i<n; i++)
+objects[i] = ITEMscan();
+printf("Capacity of knapsack: "); scanf("%f", &cap);
+MergeSort(objects, n);
+stolen = knapsack(n, objects, cap);
+printf("Results: \n");
+for(i = 0; i < n; i++)
+ITEMstore(objects[i]);
+printf("Total amount stolen: %.2f \n", stolen);
+return 0;
+}

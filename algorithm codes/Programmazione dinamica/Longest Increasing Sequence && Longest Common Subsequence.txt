@@ -1,0 +1,80 @@
+Data una sequenza di N interi
+X = (x0, x1, … xN-1)
+si definisce sottosequenza di X di lunghezza k (k N) un qualsiasi n-upla
+Y di k elementi di X con indici crescenti i0, i1, · · · , ik-1 .
+Si ricordi:
+ sottosequenza: indici non necessariamente contigui
+ sottostringa: indici contigui
+ prefisso i-esimo di lunghezza i+1 di una sequenza X: Xi = (x0, x1, … xi)
+
+ Il numero di sottoproblemi indipendenti è polinomiale (O(N)) nella
+dimensione dei dati in ingresso
+ La soluzione di ciascun sottoproblema è O(N)
+ La soluzione con programmazione dinamica ha complessità O(N^2)
+
+#define N
+int LIS(int *val) {
+int maxLength = 1;
+LISR(val,N-1, &maxLength);
+return maxLength;
+}
+RICORSIVA
+int LISR(int *val, int i, int *maxLength) {
+int j, maxLengthUpTo_i, maxLengthUpTo_j;
+if (i==0)
+return 1;
+maxLengthUpTo_i = 1;
+for (j=0; j < i; j++){
+maxLengthUpTo_j = LISR(val, j, maxLength);
+if (val[j] < val[i]){
+if (maxLengthUpTo_j + 1 > maxLengthUpTo_i)
+maxLengthUpTo_i = maxLengthUpTo_j + 1;
+}
+}
+if (*maxLength < maxLengthUpTo_i)
+*maxLength = maxLengthUpTo_i;
+return maxLengthUpTo_i;
+}
+
+DINAMICA
+ val vettore di input di N interi
+ L vettore di N interi per memorizzare la lunghezza della LIS
+per ogni prefisso i-esimo
+ P vettore di N interi per memorizzare l’indice
+dell’elemento precedente nella LIS
+ last intero per memorizzare l’indice dell’ultimo elemento
+nella LIS
+
+void LISDP(int *val) {
+int i, j, ris=1, L[N], P[N], last=1;
+L[0] = 1; P[0] = -1;
+for (i=1; i<N; i++) {
+L[i] = 1; P[i] = -1;
+for (j=0; j<i; j++)
+if ((val[j] < val[i]) && (L[i] < 1 + L[j])) {
+L[i] = 1 + L[j]; P[i] = j;
+}
+if (ris < L[i]) {
+ris = L[i]; last = i;
+}
+}
+printf("One of the Longest Increasing Sequences is ");
+LISprint(val, P, last);
+printf("and its length is %d\n", ris);
+}
+
+void LISprint(int *val, int *P, int i) {
+if (P[i]==-1) {
+printf("%d ", val[i]);
+return;
+}
+LISprint(val, P, P[i]);
+printf("%d ", val[i]);
+}
+
+Date 2 sequenze X e Y, Z è una sottosequenza comune se è
+sottosequenza sia di X che di Y.
+ES
+ACGCTAC
+CTGACA
+LCS: CGCA - CTAC

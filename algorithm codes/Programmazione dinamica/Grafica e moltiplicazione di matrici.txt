@@ -1,0 +1,109 @@
+Operazioni grafiche elementari: scalamento, rotazione e traslazione
+di figure geometriche
+
+Prodotto di 2 matrici
+ Due matrici A nr1 x nc1 e B nr2 x nc2 sono compatibili se e solo se
+nc1 = nr2
+ Ipotesi di semplificazione: matrici quadrate di dimensione n x n
+ Algoritmo semplice: 3 cicli annidati, complessità per matrici
+quadrate T(n) = (n3)
+void matMult(int **A,int **B,int **C,int nr1,int nc1,int nc2){
+int i, j, k;
+for (i=0; i<nr1; i++)
+for (j=0; j<nc2; j++) {
+C[i][j] = 0;
+for (k=0; k<nc1; k++)
+C[i][j] = C[i][j] + A[i][k]*B[k][j];
+}
+}
+
+
+Prodotto in catena di n matrici
+ Esempio: A1·A2·A3· A4 5 parentesizzazioni possibili
+(A1·(A2·(A3· A4)))
+(A1·((A2·A3)· A4))
+((A1·A2)·(A3· A4 ))
+((A1·(A2·A3))· A4)
+(((A1·A2)·A3)· A4)
+Date A1 p0 x p1 e A2 p1 x p2, il costo di A1 · A2 è legato al numero
+di moltiplicazioni scalari p0xp1x p2
+
+Per n  2 la catena si può spezzare in 2 al punto k, con 1  k  n-1.
+Il numero di parentesizzazioni è il prodotto del numero di
+parentesizzazioni delle 2 catene (la prima lunga k, la seconda lunga
+n-k)
+1 n = 1
+P(n) = sum_da1an-1_di k__ P(k) · P(n-k) n >= 2
+Si dimostra che P(n)= C(n-1)
+dove C(n) è detto numero di Catalan e vale
+C(n) = 1/(n+1) = (2n | n) = omega(4^n/n^3/2)
+il numero di parentesizzazioni è esponenziale -> non è fattibile elencare tutte quelle possibili
+NON CONVIENE ESPLORARE TUTTO LO SPAZIO DELLE SOLUZIONI DELLE PARENTESIZZAZIONI CON SOLUZIONE RICORSIVA -> TROVA SOLUZIONE OTTIMA CON PROGRAMMAZIONE DINAMICA
+
+SOL ricorsiva (complessità: T(n) = O(2n))
+int minCostR(int *p, int i, int j, int minCost) {
+int k, cost;
+if (i ==j)
+return 0;
+for (k=i; k<j; k++) {
+cost = minCostR(p, i, k, minCost) +
+minCostR(p, k+1, j, minCost) +
+p[i-1]*p[k]*p[j];
+if (cost < minCost)
+minCost = cost;
+}
+return minCost;
+}
+int matrix_chainR(int *p, int n) {
+return minCostR(p, 1, n, INT_MAX);
+}
+PROGR. DINAM
+Numero di sottoproblemi indipendenti: combinazioni
+ripetute di n elementi presi a 2 a 2
+C(n,2) = O(n^2)
+ Ai matrice pi-1 x pi con i=1, 2,….n
+ vettore p delle dimensioni
+ tabella m[1…n, 1…n] per memorizzare i costi m[i, j] e
+identificare il costo minimo
+ tabella s[1…n, 1…n] per tenere traccia del valore ottimo di k
+per ricostruire la soluzione
+int matrix_chainDP(int *p, int n) {
+int i, l, j, k, q, **m, **s;
+m = calloc((n+1), sizeof(int *));
+s = calloc((n+1), sizeof(int *));
+for (i = 0; i <= n; i++) {
+m[i] = calloc((n+1), sizeof(int));
+s[i] = calloc((n+1), sizeof(int));
+}
+for (l = 2; l <= n; l++)
+for (i = 1; i <= n-l+1; i++) {
+j = i+l-1;
+m[i][j] = INT_MAX;
+for (k = i; k <= j-1; k++) {
+q = m[i][k] + m[k+1][j] + p[i-1]*p[k]*p[j];
+if (q < m[i][j]) {
+m[i][j] = q;
+s[i][j] = k;
+}
+}
+}
+displaySol(s, 1, n);
+return m[1][n];
+}
+
+void displaySol(int **s, int i, int j) {
+if (j <= i) {
+printf("A%d", i);
+return;
+}
+printf("(");
+displaySol(s, i, s[i][j]);
+printf(") x (");
+displaySol(s, s[i][j]+1, j);
+printf(")");
+return;
+}
+
+T(n) = (n^3)
+S(n) =  (n^2)
+rispetto al costo esponenziale nel tempo della soluzione ricorsiva
